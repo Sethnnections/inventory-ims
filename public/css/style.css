@@ -1,0 +1,33 @@
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 4rem 2rem !important;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.avatar-sm {
+    width: 30px;
+    height: 30px;
+}
+
+.stats-card {
+    border-left: 4px solid;
+}
+
+.badge-role {
+    font-size: 0.8em;
+}

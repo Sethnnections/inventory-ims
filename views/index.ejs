@@ -1,0 +1,48 @@
+<div class="hero-section text-center py-5">
+    <h1 class="display-4">Welcome to Inventory Management System</h1>
+    <p class="lead">Efficiently manage your inventory with role-based access control</p>
+    
+    <% if (!user) { %>
+        <div class="mt-4">
+            <a href="/login" class="btn btn-primary btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Get Started
+            </a>
+        </div>
+    <% } else { %>
+        <div class="mt-4">
+            <a href="/dashboard" class="btn btn-success btn-lg">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Role-Based Access</h5>
+                <p class="card-text">Different permissions for Admin, Manager, and Staff roles</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-boxes fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Inventory Management</h5>
+                <p class="card-text">Track and manage your products efficiently</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Real-time Analytics</h5>
+                <p class="card-text">Get insights into your inventory performance</p>
+            </div>
+        </div>
+    </div>
+</div>
