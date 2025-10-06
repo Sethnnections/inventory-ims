@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-boxes"></i> Inventory System
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <% if (!user) { %>
+                <a class="nav-link" href="/login">
+                    <i class="fas fa-sign-in-alt me-1"></i> Login
+                </a>
+            <% } else { %>
+                <span class="navbar-text me-3">
+                    Welcome, <%= user.name %>
+                </span>
+                <a class="nav-link" href="/dashboard">
+                    <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                </a>
+            <% } %>
+        </div>
+    </div>
+</nav>

@@ -6,107 +6,64 @@
     <title><%= title %> - Inventory Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        .page-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .alert-floating {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-boxes"></i> Inventory System
-            </a>
+    <% if (user) { %>
+        <!-- Logged In Layout with Sidebar -->
+        <div class="page-container">
+            <%- include('../partials/sidebar') %>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <% if (user) { %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/dashboard">
-                                <i class="fas fa-tachometer-alt"></i> Dashboard
-                            </a>
-                        </li>
-                        
-                        <!-- Admin Links -->
-                        <% if (user.role === 'admin') { %>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/admin/users">
-                                    <i class="fas fa-users"></i> User Management
-                                </a>
-                            </li>
-                        <% } %>
-                        
-                        <!-- Manager Links -->
-                        <% if (user.role === 'manager' || user.role === 'admin') { %>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/manager/inventory">
-                                    <i class="fas fa-warehouse"></i> Inventory
-                                </a>
-                            </li>
-                        <% } %>
-                        
-                        <!-- Staff Links -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="/staff/products">
-                                <i class="fas fa-box"></i> Products
-                            </a>
-                        </li>
-                    <% } %>
-                </ul>
+            <div class="main-content">
+                <!-- Floating Alerts -->
+                <%- include('../partials/alerts') %>
                 
-                <ul class="navbar-nav">
-                    <% if (user) { %>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <% if (user.ProfilePic) { %>
-                                    <img src="<%= user.ProfilePic %>" 
-                                         alt="Profile" class="rounded-circle" width="30" height="30">
-                                <% } else { %>
-                                    <i class="fas fa-user-circle"></i>
-                                <% } %>
-                                <%= user.name %> (<%= user.role %>)
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/profile">
-                                    <i class="fas fa-user"></i> Profile
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="/api/auth/logout" method="POST" class="d-inline">
-                                        <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-sign-out-alt"></i> Logout
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    <% } else { %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/login">
-                                <i class="fas fa-sign-in-alt"></i> Login
-                            </a>
-                        </li>
-                    <% } %>
-                </ul>
+                <!-- Page Content -->
+                <%- body %>
             </div>
         </div>
-    </nav>
+    <% } else { %>
+        <!-- Not Logged In Layout -->
+        <%- include('../partials/navbar') %>
+        
+        <main class="container mt-4">
+            <!-- Floating Alerts -->
+            <%- include('../partials/alerts') %>
+            
+            <%- body %>
+        </main>
 
-    <!-- Main Content -->
-    <main class="container mt-4">
-        <%- body %>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-light mt-5 py-4">
-        <div class="container text-center">
-            <p>&copy; 2024 Inventory Management System. All rights reserved.</p>
-        </div>
-    </footer>
+        <%- include('../partials/footer-content') %>
+    <% } %>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/main.js"></script>
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>

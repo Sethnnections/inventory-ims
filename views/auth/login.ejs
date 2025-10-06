@@ -1,31 +1,63 @@
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title mb-0">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </h4>
+<div class="text-center mb-4">
+    <h2 class="fw-bold">Welcome Back</h2>
+    <p class="text-muted">Sign in to your account</p>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <form id="loginForm" action="/api/auth/login" method="POST">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required value="<%= typeof email !== 'undefined' ? email : '' %>">
+                </div>
             </div>
-            <div class="card-body">
-                <form id="loginForm">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i> Login
-                        </button>
-                    </div>
-                </form>
-                
-                <div id="alertContainer" class="mt-3"></div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+            </div>
+            
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Contact admin if you forgot your credentials
+                </small>
+            </div>
+        </form>
+        
+        <div id="alertContainer" class="mt-3"></div>
+    </div>
+</div>
+
+<!-- Demo Credentials Card -->
+<div class="card mt-4 border-0 bg-light">
+    <div class="card-body">
+        <h6 class="card-title">
+            <i class="fas fa-key me-2"></i>Demo Credentials
+        </h6>
+        <div class="row">
+            <div class="col-12">
+                <small class="text-muted d-block">
+                    <strong>Admin:</strong> thomasmangochi@inventory.com
+                </small>
+                <small class="text-muted">
+                    <strong>Password:</strong> thomasmangochi@inventory.com
+                </small>
             </div>
         </div>
     </div>
@@ -34,6 +66,13 @@
 <script>
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+    submitBtn.disabled = true;
     
     const formData = {
         email: document.getElementById('email').value,
@@ -57,10 +96,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 window.location.href = '/dashboard';
             }, 1000);
         } else {
-            showAlert(data.error || 'Login failed', 'danger');
+            showAlert(data.error || 'Invalid email or password', 'danger');
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     } catch (error) {
         showAlert('Network error. Please try again.', 'danger');
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 });
 
@@ -68,9 +113,40 @@ function showAlert(message, type) {
     const alertContainer = document.getElementById('alertContainer');
     alertContainer.innerHTML = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
+    
+    // Auto dismiss success alerts after 3 seconds
+    if (type === 'success') {
+        setTimeout(() => {
+            const alert = alertContainer.querySelector('.alert');
+            if (alert) {
+                alert.remove();
+            }
+        }, 3000);
+    }
 }
+
+// Auto-fill demo credentials for testing
+document.addEventListener('DOMContentLoaded', function() {
+    // Check URL parameters for auto-fill
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('email');
+    const passwordParam = urlParams.get('password');
+    
+    if (emailParam) {
+        document.getElementById('email').value = decodeURIComponent(emailParam);
+    }
+    if (passwordParam) {
+        document.getElementById('password').value = decodeURIComponent(passwordParam);
+    }
+    
+    // Auto-submit if both credentials are provided in URL
+    if (emailParam && passwordParam) {
+        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    }
+});
 </script>

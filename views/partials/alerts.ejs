@@ -1,0 +1,48 @@
+<% if (typeof alertMessage !== 'undefined' && alertMessage) { %>
+    <div class="alert-floating">
+        <div class="alert alert-<%= alertType || 'info' %> alert-dismissible fade show" role="alert">
+            <i class="fas fa-<%= alertType === 'success' ? 'check' : alertType === 'error' ? 'exclamation-triangle' : 'info' %>-circle me-2"></i>
+            <%= alertMessage %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+<% } %>
+
+<!-- Handle URL parameters for alerts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+        const type = urlParams.get('type');
+        
+        if (message) {
+            showAlert(message, type || 'info');
+        }
+    });
+
+    function showAlert(message, type) {
+        // Remove existing alerts
+        const existingAlerts = document.querySelectorAll('.alert-floating');
+        existingAlerts.forEach(alert => alert.remove());
+        
+        // Create new alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert-floating';
+        alertDiv.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+</script>

@@ -169,19 +169,26 @@ module.exports.removeuser = async (req, res) => {
     }
 };
 
-module.exports.logout=async(req,res)=>{
+module.exports.logout = async (req, res) => {
   try {
-     res.cookie("Inventorymanagmentsystem",'',{maxAge:0})
-       res.status(200).json({message:"Logged out successfully"})
-
-  } catch (error) {
-     res.status(500).json({
-      message: 'An error occurred during logout. Please try again.',
-      error: error.message,
+    // Clear the cookie
+    res.cookie("Inventorymanagmentsystem", '', { maxAge: 0 });
+    
+    // Destroy session
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error destroying session:', err);
+      }
+      
+      // Redirect to login with success message
+      res.redirect('/login?message=Logged out successfully&type=success');
     });
     
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.redirect('/login?message=Error during logout&type=error');
   }
-}
+};
 
 
 module.exports.updateProfile = async (req, res) => {

@@ -9,14 +9,13 @@ const createDefaultAdmin = async () => {
         await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://sethpatiencemanguluti_db_user:yw94gjnwLbnVG0kf@cluster0.7xgjpu6.mongodb.net/inventory?retryWrites=true&w=majority');
         
         // Check if admin already exists
-        const existingAdmin = await User.findOne({ email: 'thomasmangochi@inventory.com' });
+        const existingAdmin = await User.findOne({ email: 'tm@inventory.com' });
         
         if (!existingAdmin) {
-            const hashedPassword = await bcrypt.hash('thomasmangochi@inventory.com', 10);
-            
+            const hashedPassword = await bcrypt.hash('tm@inventory.com', 10);
             const defaultAdmin = new User({
                 name: 'System Administrator',
-                email: 'thomasmangochi@inventory.com',
+                email: 'tm@inventory.com',
                 password: hashedPassword,
                 role: 'admin',
                 ProfilePic: ''
@@ -24,7 +23,7 @@ const createDefaultAdmin = async () => {
             
             await defaultAdmin.save();
             console.log('✅ Default admin user created successfully!');
-            console.log('📧 Email: admin@inventory.com');
+            console.log('📧 Email: tm@inventory.com');
             console.log('🔑 Password: admin123');
             console.log('⚠️  Please change the default password immediately!');
         } else {
