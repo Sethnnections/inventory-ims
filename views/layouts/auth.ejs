@@ -3,91 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> - Inventory Management System</title>
+    <title><%= title %> - Inventory System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --dark-green: #1b4332;
+            --gold: #d4af37;
+        }
+        
         .auth-container {
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .auth-sidebar {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 2rem;
-        }
-        .auth-main {
-            background: white;
+            background: linear-gradient(135deg, var(--dark-green) 0%, #2d6a4f 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
         }
-        .system-name {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 2rem;
-        }
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-        .feature-list li {
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-        }
-        .feature-list i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-        .auth-content {
+        
+        .login-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
             width: 100%;
             max-width: 400px;
         }
-        /* Button styles */
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
         }
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        
+        .logo i {
+            font-size: 3rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+        
+        .logo h1 {
+            color: var(--dark-green);
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin: 0;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+        }
+        
+        .btn-login {
+            background: var(--dark-green);
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background: #2d6a4f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(27, 67, 50, 0.3);
+        }
+        
+        .alert {
+            border: none;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .demo-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid var(--gold);
         }
     </style>
 </head>
 <body>
     <div class="auth-container">
-        <div class="container-fluid h-100">
-            <div class="row h-100">
-                <!-- Sidebar -->
-                <div class="col-md-6 auth-sidebar d-none d-md-flex flex-column justify-content-center">
-                    <div class="system-name">
-                        <i class="fas fa-boxes"></i> Inventory System
-                    </div>
-                    <h2 class="mb-4">Efficient Inventory Management</h2>
-                    <ul class="feature-list">
-                        <li><i class="fas fa-shield-alt text-primary"></i> Role-Based Access Control</li>
-                        <li><i class="fas fa-boxes text-success"></i> Comprehensive Inventory Tracking</li>
-                        <li><i class="fas fa-chart-line text-info"></i> Real-time Analytics & Reports</li>
-                        <li><i class="fas fa-users-cog text-warning"></i> Multi-user Collaboration</li>
-                        <li><i class="fas fa-mobile-alt text-danger"></i> Responsive Design</li>
-                    </ul>
-                    <div class="mt-5">
-                        <h5>Trusted by businesses worldwide</h5>
-                        <p class="mb-0">Join thousands of companies managing their inventory efficiently</p>
-                    </div>
-                </div>
-                
-                <!-- Main Content -->
-                <div class="col-md-6 auth-main">
-                    <div class="auth-content">
-                        <%- body %>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <%- body %>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

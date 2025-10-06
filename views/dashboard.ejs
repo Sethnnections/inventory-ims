@@ -113,44 +113,30 @@
 </div>
 
 <script>
-// Load dashboard statistics
+// Load dashboard statistics using authenticated fetch
 async function loadDashboardStats() {
     try {
-        const token = '<%= user.token %>'; // You'll need to pass token to the view
-        
-        // Load user counts based on role
+        // Use the authenticated fetch helper
         const [staffRes, productsRes] = await Promise.all([
-            fetch('/api/auth/staffuser', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            }),
-            fetch('/api/product', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
+            fetch('/api/auth/staffuser', { credentials: 'include' }),
+            fetch('/api/product', { credentials: 'include' })
         ]);
         
+        // If we get here, responses are ok (auth handler would have redirected)
         const staffData = await staffRes.json();
         document.getElementById('staffCount').textContent = Array.isArray(staffData) ? staffData.length : 0;
         
-        if (user.role === 'admin' || user.role === 'manager') {
-            const managerRes = await fetch('/api/auth/manageruser', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+        // Check user role from server-side variable
+        const userRole = '<%= user.role %>';
+        
+        if (userRole === 'admin' || userRole === 'manager') {
+            const managerRes = await fetch('/api/auth/manageruser', { credentials: 'include' });
             const managerData = await managerRes.json();
             document.getElementById('managerCount').textContent = Array.isArray(managerData) ? managerData.length : 0;
         }
         
-        if (user.role === 'admin') {
-            const adminRes = await fetch('/api/auth/adminuser', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+        if (userRole === 'admin') {
+            const adminRes = await fetch('/api/auth/adminuser', { credentials: 'include' });
             const adminData = await adminRes.json();
             document.getElementById('adminCount').textContent = Array.isArray(adminData) ? adminData.length : 0;
         }
@@ -160,6 +146,7 @@ async function loadDashboardStats() {
         
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
+        // Auth error handler will redirect if needed
     }
 }
 

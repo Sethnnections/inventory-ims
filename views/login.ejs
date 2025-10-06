@@ -1,0 +1,8 @@
+<!-- Display redirect messages at the top -->
+<% if (typeof alertMessage !== 'undefined' && alertMessage) { %>
+    <div class="alert alert-<%= alertType || 'warning' %> alert-dismissible fade show" role="alert">
+        <i class="fas fa-<%= alertType === 'success' ? 'check' : alertType === 'error' ? 'exclamation-triangle' : 'info' %>-circle me-2"></i>
+        <%= alertMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<% } %>
