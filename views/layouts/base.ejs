@@ -499,61 +499,108 @@ a.btn:hover i {
                 </div>
                 
                 <nav class="sidebar-nav">
-                    <!-- Dashboard -->
-                    <div class="nav-section">
-                        <div class="nav-section-title">Main</div>
-                        <a href="/dashboard" class="nav-link <%= title === 'Dashboard' ? 'active' : '' %>">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </div>
+    <!-- Dashboard -->
+    <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="/dashboard" class="nav-link <%= title === 'Dashboard' ? 'active' : '' %>">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </div>
 
-                    <!-- Administration (Admin only) -->
-                    <% if (user.role === 'admin') { %>
-                    <div class="nav-section">
-                        <div class="nav-section-title">Administration</div>
-                        <a href="/admin/users" class="nav-link <%= title === 'User Management' ? 'active' : '' %>">
-                            <i class="fas fa-users"></i>
-                            <span>User Management</span>
-                        </a>
-                    </div>
-                    <% } %>
+    <!-- Administration (Admin only) -->
+    <% if (user.role === 'admin') { %>
+    <div class="nav-section">
+        <div class="nav-section-title">Administration</div>
+        <a href="/admin/users" class="nav-link <%= title === 'User Management' ? 'active' : '' %>">
+            <i class="fas fa-users"></i>
+            <span>User Management</span>
+        </a>
+        <a href="/admin/categories" class="nav-link <%= title === 'Category Management' ? 'active' : '' %>">
+            <i class="fas fa-tags"></i>
+            <span>Category Management</span>
+        </a>
+    </div>
+    <% } %>
 
-                    <!-- Inventory (Manager & Admin) -->
-                    <% if (user.role === 'manager' || user.role === 'admin') { %>
-                    <div class="nav-section">
-                        <div class="nav-section-title">Inventory</div>
-                        <a href="/manager/inventory" class="nav-link <%= title === 'Inventory Management' ? 'active' : '' %>">
-                            <i class="fas fa-warehouse"></i>
-                            <span>Inventory Management</span>
-                        </a>
-                    </div>
-                    <% } %>
+    <!-- Product Management (Admin & Manager) -->
+    <% if (user.role === 'admin' || user.role === 'manager') { %>
+    <div class="nav-section">
+        <div class="nav-section-title">Product Management</div>
+        <a href="/admin/products" class="nav-link <%= title === 'Product Management' ? 'active' : '' %>">
+            <i class="fas fa-boxes"></i>
+            <span>All Products</span>
+        </a>
+        <% if (user.role === 'admin') { %>
+        <a href="/admin/categories" class="nav-link <%= title === 'Category Management' ? 'active' : '' %>">
+            <i class="fas fa-sitemap"></i>
+            <span>Product Categories</span>
+        </a>
+        <% } %>
+    </div>
+    <% } %>
 
-                    <!-- Products -->
-                    <div class="nav-section">
-                        <div class="nav-section-title">Products</div>
-                        <a href="/staff/products" class="nav-link <%= title === 'Products' ? 'active' : '' %>">
-                            <i class="fas fa-box"></i>
-                            <span>View Products</span>
-                        </a>
-                    </div>
+    <!-- Inventory (Manager & Admin) -->
+    <% if (user.role === 'manager' || user.role === 'admin') { %>
+    <div class="nav-section">
+        <div class="nav-section-title">Inventory</div>
+        <a href="/manager/inventory" class="nav-link <%= title === 'Inventory Management' ? 'active' : '' %>">
+            <i class="fas fa-warehouse"></i>
+            <span>Inventory Management</span>
+        </a>
+        <a href="/staff/products" class="nav-link <%= title === 'Products' ? 'active' : '' %>">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Stock Overview</span>
+        </a>
+    </div>
+    <% } %>
 
-                    <!-- Account -->
-                    <div class="nav-section">
-                        <div class="nav-section-title">Account</div>
-                        <a href="/profile" class="nav-link <%= title === 'Profile' ? 'active' : '' %>">
-                            <i class="fas fa-user"></i>
-                            <span>My Profile</span>
-                        </a>
-                        <form action="/api/auth/logout" method="POST" class="d-inline">
-                            <button type="submit" class="nav-link w-100 text-start border-0 bg-transparent" style="color: rgba(255, 255, 255, 0.8);">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Logout</span>
-                            </button>
-                        </form>
-                    </div>
-                </nav>
+    <!-- Products (Staff & All Users) -->
+    <div class="nav-section">
+        <div class="nav-section-title">Products</div>
+        <a href="/staff/products" class="nav-link <%= title === 'Products' ? 'active' : '' %>">
+            <i class="fas fa-box"></i>
+            <span>View Products</span>
+        </a>
+        <!-- Additional product links for staff -->
+        <% if (user.role === 'staff') { %>
+        <a href="/staff/products" class="nav-link">
+            <i class="fas fa-search"></i>
+            <span>Search Products</span>
+        </a>
+        <% } %>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="nav-section">
+        <div class="nav-section-title">Quick Actions</div>
+        <% if (user.role === 'admin' || user.role === 'manager') { %>
+        <a href="/admin/products" class="nav-link">
+            <i class="fas fa-plus-circle"></i>
+            <span>Add New Product</span>
+        </a>
+        <% } %>
+        <a href="/staff/products" class="nav-link">
+            <i class="fas fa-chart-bar"></i>
+            <span>Stock Report</span>
+        </a>
+    </div>
+
+    <!-- Account -->
+    <div class="nav-section">
+        <div class="nav-section-title">Account</div>
+        <a href="/profile" class="nav-link <%= title === 'Profile' ? 'active' : '' %>">
+            <i class="fas fa-user"></i>
+            <span>My Profile</span>
+        </a>
+        <form action="/api/auth/logout" method="POST" class="d-inline">
+            <button type="submit" class="nav-link w-100 text-start border-0 bg-transparent" style="color: rgba(255, 255, 255, 0.8);">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </form>
+    </div>
+</nav>
             </div>
 
             <!-- Main Content -->

@@ -56,7 +56,26 @@ router.get("/manager/inventory", authmiddleware, managermiddleware, (req, res) =
   });
 });
 
-// Staff routes
+
+// Category management route
+router.get("/admin/categories", authmiddleware, adminmiddleware, (req, res) => {
+  res.render("admin/categories", { 
+    title: "Category Management",
+    user: req.session.user,
+    headerIcon: 'tags'
+  });
+});
+
+// Product management route
+router.get("/admin/products", authmiddleware, adminmiddleware, (req, res) => {
+  res.render("admin/products", { 
+    title: "Product Management",
+    user: req.session.user,
+    headerIcon: 'boxes'
+  });
+});
+
+// Staff product view
 router.get("/staff/products", authmiddleware, (req, res) => {
   res.render("staff/products", { 
     title: "Products",
