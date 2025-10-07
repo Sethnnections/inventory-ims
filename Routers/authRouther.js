@@ -8,6 +8,7 @@ const {
     staffuser,
     manageruser,
     adminuser,
+    updateUser,
     removeuser
 } = require('../controller/authcontroller');
 const {
@@ -26,6 +27,7 @@ router.delete("/removeuser/:UserId", authmiddleware, adminmiddleware, removeuser
 router.get("/staffuser", authmiddleware, staffuser);
 router.get("/manageruser", authmiddleware, manageruser);
 router.get("/adminuser", authmiddleware, adminmiddleware, adminuser); // Only admin can view other admins
+router.put("/updateuser/:userId", authmiddleware, adminmiddleware, updateUser);
 
 // User profile routes
 router.post("/logout", authmiddleware, logout);

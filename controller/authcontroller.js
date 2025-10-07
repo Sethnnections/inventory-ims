@@ -191,6 +191,75 @@ module.exports.logout = async (req, res) => {
 };
 
 
+// Update user profile (Admin only)
+module.exports.updateUser = async (req, res) => {
+    try {
+        // Check if requester is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                error: "Access denied. Only admin can update users." 
+            });
+        }
+
+        const { userId } = req.params;
+        const { name, email, role, ProfilePic } = req.body;
+
+        // Validate role
+        const allowedRoles = ['admin', 'manager', 'staff'];
+        if (role && !allowedRoles.includes(role)) {
+            return res.status(400).json({ 
+                error: "Invalid role. Allowed roles: admin, manager, staff" 
+            });
+        }
+
+        // Check if email already exists for other users
+        if (email) {
+            const existingUser = await User.findOne({ 
+                email, 
+                _id: { $ne: userId } 
+            });
+            if (existingUser) {
+                return res.status(400).json({ error: "Email already exists" });
+            }
+        }
+
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (email) updateData.email = email;
+        if (role) updateData.role = role;
+        if (ProfilePic) updateData.ProfilePic = ProfilePic;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId, 
+            updateData, 
+            { new: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Log the activity
+        await logActivity({
+            action: "User Updated",
+            description: `Admin ${req.user.name} updated user: ${updatedUser.name}`,
+            entity: "user",
+            entityId: updatedUser._id,
+            userId: req.user._id,
+            ipAddress: req.ip,
+        });
+
+        res.status(200).json({
+            message: "User updated successfully",
+            user: updatedUser
+        });
+
+    } catch (error) {
+        console.error("Error updating user:", error.message);
+        res.status(400).json({ error: "Error updating user: " + error.message });
+    }
+};
+
 module.exports.updateProfile = async (req, res) => {
   try {
     const { ProfilePic } = req.body;
@@ -238,16 +307,15 @@ module.exports.updateProfile = async (req, res) => {
   }
 };
 
-
 module.exports.staffuser = async (req, res) => {
   try {
     const staffuser = await User.find({ role: "staff" }).select("-password");
 
     if (staffuser.length === 0) {
-      return res.status(200).json({ message: "There are no staff users available." });
+      return res.status(200).json([]); // Return empty array instead of message
     }
 
-    res.status(200).json(staffuser);
+    res.status(200).json(staffuser); // Direct array response
   } catch (error) {
     console.log("Error in get staff Controller:", error.message);
     res.status(500).json({ message: "Internal Server Error", error });
@@ -259,10 +327,10 @@ module.exports.manageruser = async (req, res) => {
     const manageruser = await User.find({ role: "manager" }).select("-password");
 
     if (manageruser.length === 0) {
-      return res.status(200).json({ message: "There are no manager users available." });
+      return res.status(200).json([]); // Return empty array
     }
 
-    res.status(200).json(manageruser);
+    res.status(200).json(manageruser); // Direct array response
   } catch (error) {
     console.log("Error in get manager Controller:", error.message);
     res.status(500).json({ message: "Internal Server Error", error });
@@ -274,15 +342,12 @@ module.exports.adminuser = async (req, res) => {
     const adminuser = await User.find({ role: "admin" }).select("-password");
 
     if (adminuser.length === 0) {
-      return res.status(200).json({ message: "There are no admin users available." });
+      return res.status(200).json([]); // Return empty array
     }
 
-    res.status(200).json(adminuser);
+    res.status(200).json(adminuser); // Direct array response
   } catch (error) {
     console.log("Error in get admin Controller:", error.message);
     res.status(500).json({ message: "Internal Server Error", error });
   }
 }
-
-
-

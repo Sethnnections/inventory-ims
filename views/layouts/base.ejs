@@ -28,7 +28,116 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-x: hidden;
             background-color: var(--light-bg);
-        }
+     
+    color: #193c2f;
+}
+
+/* Text Colors */
+.text-gold { color: #cba130 !important; }
+.text-green { color: #193c2f !important; }
+
+/* Buttons & Badges */
+.btn-outline-primary, .btn-outline-success, .btn-outline-info, .btn-outline-secondary {
+    border-color: #193c2f;
+    color: #193c2f;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover, 
+.btn-outline-success:hover, 
+.btn-outline-info:hover, 
+.btn-outline-secondary:hover {
+    background-color: #193c2f;
+    color: #fff;
+    border-color: #193c2f;
+}
+
+.badge.bg-primary {
+    background-color: #cba130 !important;
+    color: #193c2f !important;
+}
+
+/* ====== CARDS ====== */
+.card {
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+}
+
+.card .text-muted {
+    color: #6c757d !important;
+}
+
+.card-body h2 {
+    font-weight: 700;
+}
+
+/* ====== ICON CIRCLES ====== */
+.bg-primary, .bg-success, .bg-info, .bg-warning {
+    background-color: #193c2f !important;
+    border: 2px solid #cba130;
+}
+
+.bg-primary i, .bg-success i, .bg-info i, .bg-warning i {
+    color: #cba130 !important;
+}
+
+/* ====== ALERTS ====== */
+.alert-floating {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1055;
+    min-width: 250px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+
+.alert-info {
+    background-color: #e6f3ec;
+    color: #193c2f;
+    border-left: 5px solid #cba130;
+}
+
+.alert-success {
+    background-color: #dff6e0;
+    color: #193c2f;
+    border-left: 5px solid #cba130;
+}
+
+.alert-danger {
+    background-color: #f8e6e6;
+    color: #193c2f;
+    border-left: 5px solid #cba130;
+}
+
+/* ====== HEADERS ====== */
+.card-header {
+    
+    color: #193c2f !important;
+}
+
+.card-header .text-dark {
+    color: #193c2f !important;
+}
+
+.card-title i {
+    color: #cba130 !important;
+}
+
+/* ====== DASHBOARD TITLES ====== */
+h2 i, h5 i {
+    color: #cba130 !important;
+}
+
+/* Hover for Quick Action buttons */
+a.btn:hover i {
+    color: #cba130;
+    transform: scale(1.1);
+    transition: 0.3s;
+}
+
 
         /* Common Animations */
         @keyframes fadeInUp {
@@ -98,7 +207,7 @@
         .sidebar-logo-icon {
             width: 40px;
             height: 40px;
-            background: var(--gold);
+            background: transparent;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -382,14 +491,11 @@
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <div class="sidebar-logo-icon">
-                            <i class="fas fa-boxes-stacked"></i>
+                            <img src="/images/logo.png" alt="Logo" style="width:72px; height:72px; object-fit:contain;">
                         </div>
-                        <div class="sidebar-logo-text">InventoryPro</div>
+                        <div class="sidebar-logo-text">Mangochi IMS</div>
                     </div>
-                    <div class="sidebar-user">
-                        <div class="sidebar-user-name"><%= user.name %></div>
-                        <div class="sidebar-user-role"><%= user.role %></div>
-                    </div>
+                    
                 </div>
                 
                 <nav class="sidebar-nav">
@@ -490,9 +596,9 @@
         <!-- Public Layout (No sidebar/header) -->
         <%- body %>
     <% } %>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Page-specific scripts -->
     <% if (typeof javascript !== 'undefined' && javascript) { %>
         <script><%- javascript %></script>
