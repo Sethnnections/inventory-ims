@@ -1,277 +1,647 @@
-<style>
-    :root {
-        --dark-green: #1b4332;
-        --medium-green: #2d6a4f;
-        --light-green: #40916c;
-        --gold: #d4af37;
-        --light-gold: #f4e5a1;
+<% 
+css = `
+    /* Landing Page Specific Styles */
+    .landing-body {
+        background-color: var(--light-bg);
     }
-    
-    .hero-section {
+
+    /* Landing Navbar */
+    .landing-navbar {
         background: linear-gradient(135deg, var(--dark-green) 0%, var(--medium-green) 100%);
-        color: white;
-        padding: 5rem 0;
-        border-radius: 0 0 30px 30px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        padding: 0.8rem 0;
+        position: relative;
+        z-index: 1000;
     }
-    
-    .hero-section h1 {
-        font-weight: 800;
-        font-size: 2.75rem;
-        margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+
+    .landing-navbar-brand-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
-    
-    .hero-section .lead {
-        font-size: 1.25rem;
-        color: rgba(255, 255, 255, 0.95);
-        margin-bottom: 2rem;
+
+    .landing-logo-container {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--gold) 0%, var(--light-gold) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        transition: all 0.3s ease;
     }
-    
-    .btn-hero-primary {
-        background: var(--gold);
+
+    .landing-logo-container:hover {
+        transform: rotate(5deg) scale(1.05);
+    }
+
+    .landing-logo-icon {
         color: var(--dark-green);
-        border: none;
-        padding: 0.85rem 2rem;
+        font-size: 1.5rem;
+    }
+
+    .landing-brand-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .landing-brand-name {
+        color: var(--gold);
         font-weight: 700;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-    }
-    
-    .btn-hero-primary:hover {
-        background: #c99d2d;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-        color: var(--dark-green);
-    }
-    
-    .btn-hero-secondary {
-        background: transparent;
-        color: white;
-        border: 2px solid white;
-        padding: 0.85rem 2rem;
-        font-weight: 600;
-        border-radius: 8px;
+        font-size: 1.5rem;
+        line-height: 1.2;
         transition: all 0.3s ease;
     }
-    
-    .btn-hero-secondary:hover {
-        background: white;
-        color: var(--dark-green);
+
+    .landing-brand-tagline {
+        color: var(--light-gold);
+        font-size: 0.75rem;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    .landing-navbar .navbar-brand:hover .landing-brand-name {
+        color: var(--light-gold);
         transform: translateY(-2px);
     }
-    
-    .btn-hero-success {
-        background: var(--gold);
-        color: var(--dark-green);
-        border: none;
-        padding: 0.85rem 2.5rem;
-        font-weight: 700;
-        font-size: 1.1rem;
-        border-radius: 8px;
+
+    .landing-navbar .nav-link {
+        color: var(--white);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        margin-left: 0.5rem;
     }
-    
-    .btn-hero-success:hover {
-        background: #c99d2d;
+
+    .landing-navbar .nav-link:hover {
+        color: var(--gold);
+        background-color: rgba(212, 175, 55, 0.1);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-        color: var(--dark-green);
     }
-    
-    .features-section {
-        padding: 4rem 0;
-    }
-    
-    .feature-card {
-        border: none;
-        border-radius: 15px;
-        height: 100%;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 8px 30px rgba(27, 67, 50, 0.15);
-    }
-    
-    .feature-card .card-body {
-        padding: 2.5rem 1.5rem;
-    }
-    
-    .feature-card i {
-        font-size: 3rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .feature-card.shield i {
-        color: var(--dark-green);
-    }
-    
-    .feature-card.boxes i {
+
+    .landing-navbar .nav-link i {
         color: var(--gold);
     }
-    
-    .feature-card.chart i {
-        color: var(--light-green);
+
+    /* Landing Hero Section */
+    .landing-hero {
+        position: relative;
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: var(--white);
     }
-    
-    .feature-card h5 {
-        color: var(--dark-green);
-        font-weight: 700;
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
+
+    .landing-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(165deg, 
+            var(--white) 0%, 
+            var(--white) 30%, 
+            var(--light-green) 30%, 
+            var(--medium-green) 55%,
+            var(--dark-green) 100%);
+        z-index: 1;
+        animation: gradientShift 15s ease infinite;
     }
-    
-    .feature-card p {
-        color: #6c757d;
-        font-size: 0.95rem;
-        line-height: 1.6;
+
+    @keyframes gradientShift {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.95; }
     }
-    
-    .cta-section {
-        padding: 3rem 0;
-    }
-    
-    .cta-card {
-        background: linear-gradient(135deg, var(--dark-green) 0%, var(--medium-green) 100%);
-        border: none;
-        border-radius: 20px;
-        color: white;
-        box-shadow: 0 6px 30px rgba(27, 67, 50, 0.2);
-    }
-    
-    .cta-card .card-body {
-        padding: 3.5rem 2rem;
-    }
-    
-    .cta-card h3 {
-        font-weight: 700;
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-    
-    .cta-card .lead {
-        font-size: 1.15rem;
-        margin-bottom: 2rem;
-        color: rgba(255, 255, 255, 0.95);
-    }
-    
-    .btn-cta {
+
+    .landing-hero::after {
+        content: '';
+        position: absolute;
+        top: 20%;
+        right: 10%;
+        width: 300px;
+        height: 300px;
         background: var(--gold);
+        opacity: 0.1;
+        border-radius: 50%;
+        filter: blur(80px);
+        z-index: 2;
+        animation: pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.1; }
+        50% { transform: scale(1.2); opacity: 0.15; }
+    }
+
+    .landing-hero-content {
+        position: relative;
+        z-index: 10;
+        padding: 4rem 0;
+    }
+
+    .landing-hero-content h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: var(--dark-green);
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+        line-height: 1.2;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .landing-hero-highlight {
+        color: var(--gold);
+        position: relative;
+        display: inline-block;
+    }
+
+    .landing-hero-highlight::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        background: var(--light-gold);
+        opacity: 0.3;
+        z-index: -1;
+        animation: highlightExpand 0.8s ease-out 0.3s both;
+    }
+
+    @keyframes highlightExpand {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    .landing-hero-content p {
+        font-size: 1.3rem;
+        color: var(--dark-green);
+        margin-bottom: 2.5rem;
+        opacity: 0.9;
+        max-width: 600px;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .landing-hero-buttons {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .btn-landing-primary {
+        background: linear-gradient(135deg, var(--gold) 0%, #c99d2d 100%);
         color: var(--dark-green);
         border: none;
-        padding: 0.85rem 2.5rem;
+        padding: 1rem 2.5rem;
         font-weight: 700;
         font-size: 1.1rem;
-        border-radius: 8px;
+        border-radius: 50px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-    }
-    
-    .btn-cta:hover {
-        background: #c99d2d;
-        transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-landing-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-landing-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-landing-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
         color: var(--dark-green);
     }
-    
-    @media (max-width: 768px) {
-        .hero-section h1 {
-            font-size: 2rem;
-        }
-        
-        .hero-section .lead {
-            font-size: 1rem;
-        }
-        
-        .btn-hero-primary,
-        .btn-hero-secondary {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.95rem;
-        }
+
+    .btn-landing-secondary {
+        background: var(--white);
+        color: var(--dark-green);
+        border: 2px solid var(--dark-green);
+        padding: 1rem 2.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
     }
-</style>
 
-<div class="hero-section text-center">
+    .btn-landing-secondary:hover {
+        background: var(--dark-green);
+        color: var(--white);
+        transform: translateY(-3px);
+    }
+
+    /* Landing Features Section */
+    .landing-features {
+        padding: 5rem 0;
+        background: var(--white);
+        position: relative;
+    }
+
+    .landing-section-title {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .landing-section-title h2 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--dark-green);
+        margin-bottom: 1rem;
+    }
+
+    .landing-section-title p {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+
+    .landing-feature-card {
+        background: var(--white);
+        border: none;
+        border-radius: 20px;
+        padding: 2.5rem;
+        height: 100%;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .landing-feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--gold), var(--light-gold));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .landing-feature-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(82, 183, 136, 0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .landing-feature-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(13, 59, 46, 0.2);
+    }
+
+    .landing-feature-card:hover::before {
+        opacity: 1;
+    }
+
+    .landing-feature-card:hover::after {
+        opacity: 1;
+    }
+
+    .landing-feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--light-green), var(--medium-green));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .landing-feature-card:hover .landing-feature-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .landing-feature-icon i {
+        font-size: 2.5rem;
+        color: var(--white);
+    }
+
+    .landing-feature-card.gold .landing-feature-icon {
+        background: linear-gradient(135deg, var(--gold), var(--light-gold));
+    }
+
+    .landing-feature-card h5 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-green);
+        margin-bottom: 1rem;
+    }
+
+    .landing-feature-card p {
+        color: #6c757d;
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+
+    /* Landing CTA Section */
+    .landing-cta {
+        padding: 5rem 0;
+        background: linear-gradient(135deg, var(--dark-green) 0%, var(--medium-green) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .landing-cta::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 500px;
+        height: 500px;
+        background: var(--gold);
+        opacity: 0.1;
+        border-radius: 50%;
+        filter: blur(100px);
+    }
+
+    .landing-cta-content {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        color: var(--white);
+    }
+
+    .landing-cta-content h2 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+
+    .landing-cta-content p {
+        font-size: 1.3rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.95;
+    }
+
+    /* Landing Footer */
+    .landing-footer {
+        background: var(--dark-green);
+        color: var(--white);
+        padding: 3rem 0 1.5rem;
+    }
+
+    .landing-footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .landing-footer-logo-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .landing-footer-logo-icon i {
+        color: var(--dark-green);
+        font-size: 1.2rem;
+    }
+
+    .landing-footer-logo-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gold);
+    }
+
+    .landing-footer h5 {
+        color: var(--gold);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .landing-footer p, .landing-footer a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .landing-footer a:hover {
+        color: var(--gold);
+    }
+
+    .landing-footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 1.5rem;
+        margin-top: 2rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    @media (max-width: 768px) {
+        .landing-hero-content h1 { font-size: 2.5rem; }
+        .landing-hero-content p { font-size: 1.1rem; }
+        .landing-hero-buttons { flex-direction: column; }
+        .btn-landing-primary, .btn-landing-secondary { width: 100%; }
+        .landing-section-title h2 { font-size: 2rem; }
+        .landing-cta-content h2 { font-size: 2rem; }
+    }
+`;
+%>
+
+<!-- Landing Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark landing-navbar">
     <div class="container">
-        <h1 class="display-4">Welcome to Inventory Management System</h1>
-        <p class="lead">Efficiently manage your inventory with role-based access control</p>
+        <a class="navbar-brand" href="/">
+            <div class="landing-navbar-brand-container">
+                <div class="landing-logo-container">
+                    <i class="fas fa-boxes-stacked landing-logo-icon"></i>
+                </div>
+                <div class="landing-brand-text">
+                    <span class="landing-brand-name">InventoryPro</span>
+                    <span class="landing-brand-tagline">Smart Management Solutions</span>
+                </div>
+            </div>
+        </a>
         
-        <% if (!user) { %>
-            <div class="mt-4">
-                <a href="/login" class="btn btn-hero-primary btn-lg me-3">
-                    <i class="fas fa-sign-in-alt me-2"></i>Login
-                </a>
-                <a href="#features" class="btn btn-hero-secondary btn-lg">
-                    <i class="fas fa-info-circle me-2"></i>Learn More
-                </a>
-            </div>
-        <% } else { %>
-            <div class="mt-4">
-                <a href="/dashboard" class="btn btn-hero-success btn-lg">
-                    <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
-                </a>
-            </div>
-        <% } %>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/login">
+                <i class="fas fa-sign-in-alt me-1"></i> Login
+            </a>
+        </div>
     </div>
-</div>
+</nav>
 
-<div class="features-section">
+<!-- Landing Hero Section -->
+<section class="landing-hero">
     <div class="container">
-        <div id="features" class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card feature-card shield text-center">
-                    <div class="card-body">
-                        <i class="fas fa-shield-alt"></i>
-                        <h5>Role-Based Access</h5>
-                        <p>Different permissions for Admin, Manager, and Staff roles to ensure secure and organized operations</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card feature-card boxes text-center">
-                    <div class="card-body">
-                        <i class="fas fa-boxes"></i>
-                        <h5>Inventory Management</h5>
-                        <p>Track and manage your products efficiently with comprehensive inventory control tools</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card feature-card chart text-center">
-                    <div class="card-body">
-                        <i class="fas fa-chart-line"></i>
-                        <h5>Real-time Analytics</h5>
-                        <p>Get insights into your inventory performance with detailed reports and analytics</p>
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="landing-hero-content">
+                    <h1>
+                        Smart <span class="landing-hero-highlight">Inventory</span><br>
+                        Management Made Simple
+                    </h1>
+                    <p>
+                        Streamline your business operations with our powerful inventory tracking system. Monitor stock levels, manage products, and boost efficiency effortlessly.
+                    </p>
+                    <div class="landing-hero-buttons">
+                        <a href="/login" class="btn btn-landing-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Get Started
+                        </a>
+                        <a href="#features" class="btn btn-landing-secondary">
+                            <i class="fas fa-info-circle me-2"></i>Learn More
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<% if (!user) { %>
-    <div class="cta-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card cta-card text-center">
-                        <div class="card-body">
-                            <h3>Ready to get started?</h3>
-                            <p class="lead">Login to access your inventory dashboard and start managing efficiently</p>
-                            <a href="/login" class="btn btn-cta">
-                                <i class="fas fa-sign-in-alt me-2"></i>Login Now
-                            </a>
-                        </div>
+<!-- Landing Features Section -->
+<section id="features" class="landing-features">
+    <div class="container">
+        <div class="landing-section-title">
+            <h2>Powerful Features for Your Business</h2>
+            <p>Everything you need to manage inventory efficiently</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="landing-feature-card">
+                    <div class="landing-feature-icon">
+                        <i class="fas fa-box-open"></i>
                     </div>
+                    <h5>Product Tracking</h5>
+                    <p>Keep track of all your products in real-time. Monitor stock levels, locations, and movement history with ease.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="landing-feature-card gold">
+                    <div class="landing-feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5>Smart Analytics</h5>
+                    <p>Get detailed insights into your inventory performance with powerful analytics and reporting tools.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="landing-feature-card">
+                    <div class="landing-feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h5>Low Stock Alerts</h5>
+                    <p>Never run out of stock again. Receive automatic notifications when inventory levels are running low.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="landing-feature-card">
+                    <div class="landing-feature-icon">
+                        <i class="fas fa-barcode"></i>
+                    </div>
+                    <h5>Barcode Scanning</h5>
+                    <p>Speed up your inventory management with integrated barcode scanning for quick product identification.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="landing-feature-card gold">
+                    <div class="landing-feature-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h5>Real-Time Sync</h5>
+                    <p>All your inventory data syncs in real-time across all devices and locations for seamless operations.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="landing-feature-card">
+                    <div class="landing-feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h5>Secure & Reliable</h5>
+                    <p>Your data is protected with enterprise-level security and automatic backups for peace of mind.</p>
                 </div>
             </div>
         </div>
     </div>
-<% } %>
+</section>
+
+<!-- Landing CTA Section -->
+<section class="landing-cta">
+    <div class="container">
+        <div class="landing-cta-content">
+            <h2>Ready to Transform Your Inventory?</h2>
+            <p>Join thousands of businesses managing their inventory smarter</p>
+            <a href="/login" class="btn btn-landing-primary">
+                <i class="fas fa-rocket me-2"></i>Start Now
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Landing Footer -->
+<footer class="landing-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="landing-footer-logo">
+                    <div class="landing-footer-logo-icon">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                    <div class="landing-footer-logo-text">InventoryPro</div>
+                </div>
+                <p>Streamline your business operations with our powerful inventory tracking system. Monitor stock levels, manage products, and boost efficiency effortlessly.</p>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="/">Home</a></li>
+                    <li class="mb-2"><a href="#features">Features</a></li>
+                    <li class="mb-2"><a href="/login">Login</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5>Contact Us</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-envelope me-2"></i> support@inventorypro.com</li>
+                    <li class="mb-2"><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</li>
+                    <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Business Ave, Suite 100</li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5>Connect With Us</h5>
+                <div class="d-flex gap-3 mt-3">
+                    <a href="#" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="landing-footer-bottom">
+            <p>&copy; 2023 InventoryPro. All rights reserved.</p>
+        </div>
+    </div>
+</footer>

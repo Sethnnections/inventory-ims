@@ -1,0 +1,36 @@
+<% 
+css = `
+    .error-page {
+        background: linear-gradient(135deg, var(--dark-green) 0%, var(--medium-green) 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .error-container {
+        text-align: center;
+        color: var(--white);
+    }
+    
+    .error-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: var(--gold);
+    }
+    
+    .error-message {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+`;
+%>
+
+<div class="error-container">
+    <i class="fas fa-exclamation-triangle error-icon"></i>
+    <h1 class="error-message">Server Error</h1>
+    <p class="mb-4"><%= typeof message !== 'undefined' ? message : 'Something went wrong on our end. Please try again later.' %></p>
+    <a href="/" class="btn btn-primary-custom">
+        <i class="fas fa-home me-2"></i>Go Home
+    </a>
+</div>

@@ -5,8 +5,7 @@ const { authmiddleware, adminmiddleware, managermiddleware } = require('../middl
 // Public routes
 router.get("/", (req, res) => {
   res.render("index", { 
-    title: "Home",
-    layout: 'layouts/base' 
+    title: "Home"
   });
 });
 
@@ -15,7 +14,6 @@ router.get("/login", (req, res) => {
     return res.redirect('/dashboard');
   }
   
-  // Get alert parameters from URL
   const alertMessage = req.query.message;
   const alertType = req.query.type;
   
@@ -27,7 +25,7 @@ router.get("/login", (req, res) => {
   });
 });
 
-// Add alert handling to other routes if needed
+// Dashboard with role-based access
 router.get("/dashboard", authmiddleware, (req, res) => {
     const alertMessage = req.query.message;
     const alertType = req.query.type;
@@ -35,17 +33,17 @@ router.get("/dashboard", authmiddleware, (req, res) => {
     res.render("dashboard", { 
         title: "Dashboard",
         user: req.session.user,
-        layout: 'layouts/base',
         alertMessage,
         alertType
     });
 });
+
 // Admin only routes
 router.get("/admin/users", authmiddleware, adminmiddleware, (req, res) => {
   res.render("admin/users", { 
     title: "User Management",
     user: req.session.user,
-    layout: 'layouts/base'
+    headerIcon: 'users'
   });
 });
 
@@ -54,7 +52,7 @@ router.get("/manager/inventory", authmiddleware, managermiddleware, (req, res) =
   res.render("manager/inventory", { 
     title: "Inventory Management",
     user: req.session.user,
-    layout: 'layouts/base'
+    headerIcon: 'warehouse'
   });
 });
 
@@ -63,7 +61,7 @@ router.get("/staff/products", authmiddleware, (req, res) => {
   res.render("staff/products", { 
     title: "Products",
     user: req.session.user,
-    layout: 'layouts/base'
+    headerIcon: 'box'
   });
 });
 
@@ -72,7 +70,7 @@ router.get("/profile", authmiddleware, (req, res) => {
   res.render("profile", { 
     title: "Profile",
     user: req.session.user,
-    layout: 'layouts/base'
+    headerIcon: 'user'
   });
 });
 

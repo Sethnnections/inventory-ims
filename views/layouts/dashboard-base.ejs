@@ -1,0 +1,93 @@
+<%- include('base', {
+    title: title + ' - Dashboard',
+    bodyClass: 'dashboard-body',
+    css: `
+        /* Dashboard Specific Styles */
+        :root {
+            --sidebar-width: 240px;
+            --sidebar-collapsed-width: 60px;
+        }
+
+        .dashboard-body {
+            background-color: var(--light-bg);
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background-color: var(--white);
+            color: #333;
+            padding: 0.6rem 1.5rem;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            z-index: 999;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .dashboard-header.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Dashboard Sidebar */
+        .dashboard-sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--dark-green);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 1rem 0.8rem;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            transition: width 0.3s ease;
+            z-index: 1000;
+            overflow-x: hidden;
+        }
+
+        .dashboard-sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        /* Dashboard Main Content */
+        .dashboard-main {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            background-color: #fefefe;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+            margin-top: 60px;
+        }
+
+        .dashboard-main.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* ... rest of dashboard styles ... */
+    `
+}); %>
+
+<!-- Dashboard content goes here -->
+<div class="dashboard-sidebar" id="sidebar">
+    <!-- Sidebar content -->
+</div>
+
+<header class="dashboard-header" id="header">
+    <!-- Header content -->
+</header>
+
+<main class="dashboard-main" id="mainContent">
+    <%- body %>
+</main>
+
+<footer class="dashboard-footer" id="footer">
+    <!-- Footer content -->
+</footer>

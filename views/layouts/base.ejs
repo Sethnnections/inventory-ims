@@ -1,504 +1,550 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %> - Inventory Management System</title>
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-
-  <style>
-    :root {
-      --dark-green: #1b4332;
-      --light-green: #2d6a4f;
-      --accent: #40916c;
-      --gold: #d4af37;
-      --white: #ffffff;
-      --light-gray: #f8f9fa;
-      --medium-gray: #e9ecef;
-      --dark-gray: #6c757d;
-      --sidebar-width: 240px;
-      --sidebar-collapsed-width: 60px;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--light-gray);
-      transition: margin-left 0.3s ease;
-      color: #333;
-    }
-
-    /* Header */
-    .header {
-      background-color: var(--white);
-      color: #333;
-      padding: 0.6rem 1.5rem;
-      margin-left: var(--sidebar-width);
-      transition: margin-left 0.3s ease;
-      z-index: 999;
-      position: fixed;
-      top: 0;
-      right: 0;
-      left: 0;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 60px;
-    }
-
-    .header.expanded {
-      margin-left: var(--sidebar-collapsed-width);
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-    }
-
-    .toggle-sidebar {
-      background: none;
-      border: none;
-      color: var(--dark-gray);
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 0.4rem;
-      border-radius: 4px;
-      transition: all 0.2s ease;
-      margin-right: 1rem;
-    }
-
-    .toggle-sidebar:hover {
-      background-color: var(--medium-gray);
-      color: var(--dark-green);
-    }
-
-    .header-title {
-      font-size: 1.1rem;
-      color: var(--dark-green);
-      margin: 0;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .user-info {
-      font-size: 0.85rem;
-      color: var(--dark-gray);
-    }
-
-    .header-link {
-      color: var(--dark-gray);
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: color 0.2s ease;
-    }
-
-    .header-link:hover {
-      color: var(--accent);
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: var(--sidebar-width);
-      background-color: var(--dark-green);
-      color: #ffffff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      left: 0;
-      top: 0;
-      padding: 1rem 0.8rem;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-      transition: width 0.3s ease;
-      z-index: 1000;
-      overflow-x: hidden;
-    }
-
-    .sidebar.collapsed {
-      width: var(--sidebar-collapsed-width);
-    }
-
-    .sidebar.collapsed .sidebar-header h5,
-    .sidebar.collapsed .sidebar-content h6,
-    .sidebar.collapsed .sidebar-content span {
-      display: none;
-    }
-
-    .sidebar.collapsed .sidebar-content a {
-      text-align: center;
-      padding: 0.6rem 0.4rem;
-    }
-
-    .sidebar.collapsed .sidebar-content a i {
-      margin-right: 0;
-    }
-
-    .sidebar-header {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      padding-top: 0.5rem;
-    }
-
-    .sidebar-header i {
-      font-size: 1.8rem;
-      background-color: var(--dark-green);
-      color: var(--white);
-      border-radius: 8px;
-      padding: 0.6rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .sidebar-header h5 {
-      color: var(--white);
-      font-weight: 500;
-      margin-bottom: 0;
-      font-size: 1rem;
-      transition: opacity 0.3s ease;
-    }
-
-    .sidebar-content {
-      flex: 1;
-    }
-
-    .sidebar-content a {
-      display: flex;
-      align-items: center;
-      color: var(--white);
-      background-color: transparent;
-      border: none;
-      text-align: left;
-      padding: 0.6rem 0.8rem;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 400;
-      transition: all 0.2s ease;
-      margin-bottom: 0.2rem;
-      font-size: 0.9rem;
-    }
-
-    .sidebar-content a:hover {
-      background-color: var(--light-gray);
-      color: var(--accent);
-    }
-
-    .sidebar-content a.active {
-      background-color: var(--accent);
-      color: var(--white);
-    }
-
-    .sidebar-content a i {
-      margin-right: 0.75rem;
-      width: 18px;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-
-    .sidebar-content h6 {
-      color: var(--dark-gray);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 1.2rem 0 0.5rem 0.5rem;
-      transition: opacity 0.3s ease;
-    }
-
-    .sidebar .btn-logout {
-      border: 1px solid var(--medium-gray);
-      color: var(--dark-gray);
-      border-radius: 6px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.6rem;
-      background: none;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-
-    .sidebar .btn-logout:hover {
-      background-color: #ffe6e6;
-      color: #d32f2f;
-      border-color: #ffcdd2;
-    }
-
-    /* Main Content */
-    .main-content {
-      margin-left: var(--sidebar-width);
-      padding: 2rem;
-      background-color: #fefefe;
-      min-height: 100vh;
-      transition: margin-left 0.3s ease;
-      margin-top: 60px;
-    }
-
-    .main-content.expanded {
-      margin-left: var(--sidebar-collapsed-width);
-    }
-
-    /* Footer */
-    footer {
-      background: var(--white);
-      color: var(--dark-gray);
-      text-align: center;
-      padding: 1rem 0;
-      margin-top: auto;
-      margin-left: var(--sidebar-width);
-      transition: margin-left 0.3s ease;
-      border-top: 1px solid var(--medium-gray);
-      font-size: 0.8rem;
-    }
-
-    footer.expanded {
-      margin-left: var(--sidebar-collapsed-width);
-    }
-
-    /* Alerts */
-    .alert-floating {
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      z-index: 1050;
-      min-width: 300px;
-    }
-
-    /* Mobile Responsiveness */
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-        width: var(--sidebar-width);
-      }
-      
-      .sidebar.mobile-open {
-        transform: translateX(0);
-      }
-      
-      .main-content, .header, footer {
-        margin-left: 0;
-      }
-      
-      .mobile-menu-toggle {
-        display: block;
-      }
-    }
-
-    .mobile-menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--dark-gray);
-      font-size: 1.2rem;
-    }
-
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.3);
-      z-index: 999;
-    }
-
-    .overlay.active {
-      display: block;
-    }
-
-    /* Content card styling */
-    .content-card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="overlay" id="overlay"></div>
-
-  <% if (user) { %>
-    <header class="header" id="header">
-      <div class="header-left">
-        <button class="toggle-sidebar" id="toggleSidebar">
-          <i class="fas fa-bars"></i>
-        </button>
-        <h1 class="header-title"><%= title %></h1>
-      </div>
-      <div class="header-right">
-        <span class="user-info">Welcome, <%= user.name %></span>
-        <a href="/dashboard" class="header-link"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
-      </div>
-    </header>
-
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <i class="fas fa-boxes"></i>
-        <h5>Inventory System</h5>
-      </div>
-
-      <div class="sidebar-content">
-        <a href="/dashboard" class="<%= title === 'Dashboard' ? 'active' : '' %>">
-          <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
-        </a>
-
-        <% if (user.role === 'admin') { %>
-          <h6>Administration</h6>
-          <a href="/admin/users" class="<%= title === 'User Management' ? 'active' : '' %>">
-            <i class="fas fa-users"></i> <span>User Management</span>
-          </a>
-        <% } %>
-
-        <% if (user.role === 'manager' || user.role === 'admin') { %>
-          <h6>Inventory</h6>
-          <a href="/manager/inventory" class="<%= title === 'Inventory Management' ? 'active' : '' %>">
-            <i class="fas fa-warehouse"></i> <span>Inventory Management</span>
-          </a>
-        <% } %>
-
-        <h6>Products</h6>
-        <a href="/staff/products" class="<%= title === 'Products' ? 'active' : '' %>">
-          <i class="fas fa-box"></i> <span>View Products</span>
-        </a>
-
-        <h6>Account</h6>
-        <a href="/profile" class="<%= title === 'Profile' ? 'active' : '' %>">
-          <i class="fas fa-user"></i> <span>My Profile</span>
-        </a>
-
-        <div class="mt-4 pt-3 border-top">
-          <form action="/api/auth/logout" method="POST" class="d-grid">
-            <button type="submit" class="btn-logout">
-              <i class="fas fa-sign-out-alt me-2"></i> <span>Logout</span>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <main class="main-content" id="mainContent">
-      <div class="pt-3">
-        <%- include('../partials/alerts') %>
-        
-        <!-- Sample content for demonstration -->
-        <div class="content-card">
-          <h3>Welcome to your dashboard</h3>
-          <p>This is a sample content area. Your actual page content will be rendered here.</p>
-          <div class="row mt-4">
-            <div class="col-md-4">
-              <div class="card border-0 bg-light">
-                <div class="card-body">
-                  <h5 class="card-title">Total Products</h5>
-                  <p class="card-text display-6">124</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="card border-0 bg-light">
-                <div class="card-body">
-                  <h5 class="card-title">Low Stock</h5>
-                  <p class="card-text display-6">7</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="card border-0 bg-light">
-                <div class="card-body">
-                  <h5 class="card-title">Recent Orders</h5>
-                  <p class="card-text display-6">23</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <%- body %>
-      </div>
-    </main>
-
-    <footer id="footer">
-      &copy; <%= new Date().getFullYear() %> Mangochi Inventory System. All Rights Reserved.
-    </footer>
-  <% } else { %>
-    <%- include('../partials/navbar') %>
-    <main class="container mt-4">
-      <%- include('../partials/alerts') %>
-      <%- body %>
-    </main>
-    <%- include('../partials/footer-content') %>
-  <% } %>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    // Auto-dismiss alerts after 5 seconds
-    document.addEventListener("DOMContentLoaded", function () {
-      const alerts = document.querySelectorAll(".alert");
-      alerts.forEach((alert) => {
-        setTimeout(() => {
-          const bsAlert = new bootstrap.Alert(alert);
-          bsAlert.close();
-        }, 5000);
-      });
-
-      // Sidebar toggle functionality
-      const toggleSidebar = document.getElementById('toggleSidebar');
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const header = document.getElementById('header');
-      const footer = document.getElementById('footer');
-
-      if (toggleSidebar) {
-        toggleSidebar.addEventListener('click', function() {
-          sidebar.classList.toggle('collapsed');
-          mainContent.classList.toggle('expanded');
-          header.classList.toggle('expanded');
-          footer.classList.toggle('expanded');
-          
-          // Change the toggle icon
-          const icon = this.querySelector('i');
-          if (sidebar.classList.contains('collapsed')) {
-            icon.classList.remove('fa-bars');
-            icon.classList.add('fa-chevron-right');
-          } else {
-            icon.classList.remove('fa-chevron-right');
-            icon.classList.add('fa-bars');
-          }
-        });
-      }
-
-      // Mobile menu functionality
-      const mobileToggle = document.getElementById('mobileToggle');
-      const overlay = document.getElementById('overlay');
-
-      // Close mobile menu when clicking a link
-      const sidebarLinks = document.querySelectorAll('.sidebar-content a');
-      sidebarLinks.forEach(link => {
-        link.addEventListener('click', function() {
-          if (window.innerWidth <= 768) {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-          }
-        });
-      });
-
-      // Handle window resize
-      window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-          sidebar.classList.remove('mobile-open');
-          if (overlay) overlay.classList.remove('active');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title + ' - Inventory Management System' : 'Inventory Management System' %></title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Common Styles */
+        :root {
+            --dark-green: #0d3b2e;
+            --medium-green: #145c44;
+            --light-green: #52b788;
+            --gold: #d4af37;
+            --light-gold: #f0d875;
+            --white: #ffffff;
+            --light-bg: #f8f9fa;
+            --sidebar-width: 260px;
+            --header-height: 70px;
         }
-      });
-    });
-  </script>
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            background-color: var(--light-bg);
+        }
+
+        /* Common Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Common Button Styles */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--gold) 0%, #c99d2d 100%);
+            color: var(--dark-green);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Dashboard Layout Styles */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark-green) 0%, var(--medium-green) 100%);
+            color: var(--white);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gold);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-logo-icon i {
+            color: var(--dark-green);
+            font-size: 1.2rem;
+        }
+
+        .sidebar-logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .sidebar-user {
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+
+        .sidebar-user-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.5rem 1rem;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-left-color: var(--gold);
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--white);
+            border-left-color: var(--gold);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .nav-link .badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--white);
+            height: var(--header-height);
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-green);
+            margin: 0;
+        }
+
+        .header-left h1 i {
+            color: var(--gold);
+            margin-right: 0.5rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--light-bg);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--dark-green);
+            transition: all 0.3s ease;
+        }
+
+        .user-menu:hover {
+            background: #e9ecef;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--light-gold) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-green);
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 2rem;
+            background: var(--light-bg);
+        }
+
+        /* Alert Styles */
+        .alert-floating {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: var(--white);
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: var(--dark-green);
+            margin: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--dark-green);
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+    </style>
+
+    <!-- Page-specific styles -->
+    <% if (typeof css !== 'undefined' && css) { %>
+        <style><%- css %></style>
+    <% } %>
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
+    <% if (user) { %>
+        <!-- Dashboard Layout -->
+        <div class="dashboard-layout">
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <div class="sidebar-logo-icon">
+                            <i class="fas fa-boxes-stacked"></i>
+                        </div>
+                        <div class="sidebar-logo-text">InventoryPro</div>
+                    </div>
+                    <div class="sidebar-user">
+                        <div class="sidebar-user-name"><%= user.name %></div>
+                        <div class="sidebar-user-role"><%= user.role %></div>
+                    </div>
+                </div>
+                
+                <nav class="sidebar-nav">
+                    <!-- Dashboard -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Main</div>
+                        <a href="/dashboard" class="nav-link <%= title === 'Dashboard' ? 'active' : '' %>">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </div>
+
+                    <!-- Administration (Admin only) -->
+                    <% if (user.role === 'admin') { %>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Administration</div>
+                        <a href="/admin/users" class="nav-link <%= title === 'User Management' ? 'active' : '' %>">
+                            <i class="fas fa-users"></i>
+                            <span>User Management</span>
+                        </a>
+                    </div>
+                    <% } %>
+
+                    <!-- Inventory (Manager & Admin) -->
+                    <% if (user.role === 'manager' || user.role === 'admin') { %>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Inventory</div>
+                        <a href="/manager/inventory" class="nav-link <%= title === 'Inventory Management' ? 'active' : '' %>">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Inventory Management</span>
+                        </a>
+                    </div>
+                    <% } %>
+
+                    <!-- Products -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Products</div>
+                        <a href="/staff/products" class="nav-link <%= title === 'Products' ? 'active' : '' %>">
+                            <i class="fas fa-box"></i>
+                            <span>View Products</span>
+                        </a>
+                    </div>
+
+                    <!-- Account -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Account</div>
+                        <a href="/profile" class="nav-link <%= title === 'Profile' ? 'active' : '' %>">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
+                        </a>
+                        <form action="/api/auth/logout" method="POST" class="d-inline">
+                            <button type="submit" class="nav-link w-100 text-start border-0 bg-transparent" style="color: rgba(255, 255, 255, 0.8);">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </form>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Header -->
+                <header class="header">
+                    <div class="header-left">
+                        <button class="mobile-menu-toggle" id="mobileToggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1>
+                            <i class="fas fa-<%= typeof headerIcon !== 'undefined' ? headerIcon : 'tachometer-alt' %>"></i>
+                            <%= title %>
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="/profile" class="user-menu">
+                            <div class="user-avatar">
+                                <%= user.name.charAt(0).toUpperCase() %>
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name"><%= user.name %></span>
+                                <span class="user-role"><%= user.role %></span>
+                            </div>
+                        </a>
+                    </div>
+                </header>
+
+                <!-- Content -->
+                <main class="content">
+                    <%- body %>
+                </main>
+            </div>
+        </div>
+
+        <!-- Mobile Overlay -->
+        <div class="overlay" id="overlay"></div>
+
+    <% } else { %>
+        <!-- Public Layout (No sidebar/header) -->
+        <%- body %>
+    <% } %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Page-specific scripts -->
+    <% if (typeof javascript !== 'undefined' && javascript) { %>
+        <script><%- javascript %></script>
+    <% } %>
+
+    <script>
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.getElementById('mobileToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            if (mobileToggle && sidebar) {
+                mobileToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('active');
+                });
+
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                });
+
+                // Close mobile menu when clicking a link
+                const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.remove('mobile-open');
+                            overlay.classList.remove('active');
+                        }
+                    });
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768) {
+                        sidebar.classList.remove('mobile-open');
+                        overlay.classList.remove('active');
+                    }
+                });
+            }
+
+            // Auto-dismiss alerts after 5 seconds
+            const alerts = document.querySelectorAll(".alert");
+            alerts.forEach((alert) => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>

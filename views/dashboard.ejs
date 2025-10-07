@@ -1,22 +1,63 @@
+<% 
+// Set header icon for dashboard
+headerIcon = 'tachometer-alt';
+
+// Alert handling
+if (typeof alertMessage !== 'undefined' && alertMessage) {
+    javascript = `
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create and show alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-${alertType || 'info'} alert-floating alert-dismissible fade show';
+            alertDiv.innerHTML = \`
+                <i class="fas fa-${alertType === 'success' ? 'check-circle' : alertType === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${alertMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            \`;
+            document.body.appendChild(alertDiv);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        });
+    `;
+}
+%>
+
+<!-- Dashboard Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>
-        <i class="fas fa-tachometer-alt"></i> Dashboard
+    <h2 class="mb-0">
+        <i class="fas fa-tachometer-alt text-gold"></i> Dashboard Overview
     </h2>
-    <span class="badge bg-secondary">Role: <%= user.role %></span>
+    <span class="badge bg-primary fs-6">
+        <i class="fas fa-user-shield me-1"></i>Role: <%= user.role %>
+    </span>
 </div>
 
+<!-- Statistics Cards -->
 <div class="row">
     <!-- Role-based dashboard cards -->
     <% if (user.role === 'admin') { %>
-        <div class="col-md-3 mb-4">
-            <div class="card bg-primary text-white">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 id="adminCount">-</h4>
-                            <p>Admins</p>
+                            <h2 class="text-primary mb-0" id="adminCount">-</h2>
+                            <p class="text-muted mb-0">Administrators</p>
                         </div>
-                        <i class="fas fa-user-shield fa-2x"></i>
+                        <div class="bg-primary rounded-circle p-3">
+                            <i class="fas fa-user-shield fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            System Managers
+                        </small>
                     </div>
                 </div>
             </div>
@@ -24,88 +65,139 @@
     <% } %>
     
     <% if (user.role === 'admin' || user.role === 'manager') { %>
-        <div class="col-md-3 mb-4">
-            <div class="card bg-success text-white">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 id="managerCount">-</h4>
-                            <p>Managers</p>
+                            <h2 class="text-success mb-0" id="managerCount">-</h2>
+                            <p class="text-muted mb-0">Managers</p>
                         </div>
-                        <i class="fas fa-user-tie fa-2x"></i>
+                        <div class="bg-success rounded-circle p-3">
+                            <i class="fas fa-user-tie fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-success">
+                            <i class="fas fa-users me-1"></i>
+                            Team Leaders
+                        </small>
                     </div>
                 </div>
             </div>
         </div>
     <% } %>
     
-    <div class="col-md-3 mb-4">
-        <div class="card bg-info text-white">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h4 id="staffCount">-</h4>
-                        <p>Staff</p>
+                        <h2 class="text-info mb-0" id="staffCount">-</h2>
+                        <p class="text-muted mb-0">Staff Members</p>
                     </div>
-                    <i class="fas fa-users fa-2x"></i>
+                    <div class="bg-info rounded-circle p-3">
+                        <i class="fas fa-users fa-2x text-white"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-success">
+                        <i class="fas fa-user-check me-1"></i>
+                        Active Team
+                    </small>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-4">
-        <div class="card bg-warning text-dark">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h4 id="productCount">-</h4>
-                        <p>Products</p>
+                        <h2 class="text-warning mb-0" id="productCount">-</h2>
+                        <p class="text-muted mb-0">Total Products</p>
                     </div>
-                    <i class="fas fa-box fa-2x"></i>
+                    <div class="bg-warning rounded-circle p-3">
+                        <i class="fas fa-box fa-2x text-white"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-success">
+                        <i class="fas fa-cubes me-1"></i>
+                        In Inventory
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Quick Actions based on Role -->
+<!-- Quick Actions -->
 <div class="row mt-4">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-bolt"></i> Quick Actions
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-dark">
+                    <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
                 </h5>
             </div>
             <div class="card-body">
-                <div class="row">
+                <div class="row g-3">
                     <% if (user.role === 'admin') { %>
-                        <div class="col-md-3 mb-2">
-                            <a href="/admin/users" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-users"></i> Manage Users
+                        <div class="col-xl-3 col-md-6">
+                            <a href="/admin/users" class="btn btn-outline-primary w-100 h-100 py-3">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <div>Manage Users</div>
+                                <small class="text-muted">User administration</small>
                             </a>
                         </div>
                     <% } %>
                     
                     <% if (user.role === 'manager' || user.role === 'admin') { %>
-                        <div class="col-md-3 mb-2">
-                            <a href="/manager/inventory" class="btn btn-outline-success w-100">
-                                <i class="fas fa-warehouse"></i> Manage Inventory
+                        <div class="col-xl-3 col-md-6">
+                            <a href="/manager/inventory" class="btn btn-outline-success w-100 h-100 py-3">
+                                <i class="fas fa-warehouse fa-2x mb-2"></i>
+                                <div>Manage Inventory</div>
+                                <small class="text-muted">Stock control</small>
                             </a>
                         </div>
                     <% } %>
                     
-                    <div class="col-md-3 mb-2">
-                        <a href="/staff/products" class="btn btn-outline-info w-100">
-                            <i class="fas fa-box"></i> View Products
+                    <div class="col-xl-3 col-md-6">
+                        <a href="/staff/products" class="btn btn-outline-info w-100 h-100 py-3">
+                            <i class="fas fa-box fa-2x mb-2"></i>
+                            <div>View Products</div>
+                            <small class="text-muted">Browse catalog</small>
                         </a>
                     </div>
                     
-                    <div class="col-md-3 mb-2">
-                        <a href="/profile" class="btn btn-outline-secondary w-100">
-                            <i class="fas fa-user"></i> My Profile
+                    <div class="col-xl-3 col-md-6">
+                        <a href="/profile" class="btn btn-outline-secondary w-100 h-100 py-3">
+                            <i class="fas fa-user fa-2x mb-2"></i>
+                            <div>My Profile</div>
+                            <small class="text-muted">Account settings</small>
                         </a>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-dark">
+                    <i class="fas fa-history text-primary me-2"></i>Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Activity tracking coming soon...</p>
                 </div>
             </div>
         </div>
@@ -113,40 +205,44 @@
 </div>
 
 <script>
-// Load dashboard statistics using authenticated fetch
+// Load dashboard statistics
 async function loadDashboardStats() {
     try {
-        // Use the authenticated fetch helper
         const [staffRes, productsRes] = await Promise.all([
             fetch('/api/auth/staffuser', { credentials: 'include' }),
             fetch('/api/product', { credentials: 'include' })
         ]);
         
-        // If we get here, responses are ok (auth handler would have redirected)
-        const staffData = await staffRes.json();
-        document.getElementById('staffCount').textContent = Array.isArray(staffData) ? staffData.length : 0;
+        if (staffRes.ok) {
+            const staffData = await staffRes.json();
+            document.getElementById('staffCount').textContent = Array.isArray(staffData) ? staffData.length : 0;
+        }
         
-        // Check user role from server-side variable
         const userRole = '<%= user.role %>';
         
-        if (userRole === 'admin' || userRole === 'manager') {
+        if ((userRole === 'admin' || userRole === 'manager') && staffRes.ok) {
             const managerRes = await fetch('/api/auth/manageruser', { credentials: 'include' });
-            const managerData = await managerRes.json();
-            document.getElementById('managerCount').textContent = Array.isArray(managerData) ? managerData.length : 0;
+            if (managerRes.ok) {
+                const managerData = await managerRes.json();
+                document.getElementById('managerCount').textContent = Array.isArray(managerData) ? managerData.length : 0;
+            }
         }
         
         if (userRole === 'admin') {
             const adminRes = await fetch('/api/auth/adminuser', { credentials: 'include' });
-            const adminData = await adminRes.json();
-            document.getElementById('adminCount').textContent = Array.isArray(adminData) ? adminData.length : 0;
+            if (adminRes.ok) {
+                const adminData = await adminRes.json();
+                document.getElementById('adminCount').textContent = Array.isArray(adminData) ? adminData.length : 0;
+            }
         }
         
-        const productsData = await productsRes.json();
-        document.getElementById('productCount').textContent = Array.isArray(productsData) ? productsData.length : 0;
+        if (productsRes.ok) {
+            const productsData = await productsRes.json();
+            document.getElementById('productCount').textContent = Array.isArray(productsData) ? productsData.length : 0;
+        }
         
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
-        // Auth error handler will redirect if needed
     }
 }
 
