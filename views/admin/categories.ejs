@@ -1,57 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title><%= title %> - Inventory Management</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    
-    <style>
-        .card-stats .icon-shape {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .badge {
-            font-size: 0.75rem;
-            padding: 0.35em 0.65em;
-        }
-        .category-badge {
-            font-size: 0.7rem;
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <%- include('../partials/header') %>
+  
 
-    <div class="container-fluid mt-4">
         <div class="row">
             <!-- Sidebar -->
-            <%- include('../partials/sidebar') %>
             
             <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="col-md-12 ms-sm-auto">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h2 class="h4 fw-bold mb-1">
-                            <i class="fas fa-tags text-primary me-2"></i>Category Management
-                        </h2>
+                       
                         <p class="text-muted mb-0">Manage product categories and organization</p>
                     </div>
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
@@ -152,7 +111,6 @@
                 </div>
             </main>
         </div>
-    </div>
 
     <!-- Create Category Modal -->
     <div class="modal fade" id="createCategoryModal" tabindex="-1">
@@ -243,19 +201,33 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
-    <script>
-        // Global variables
-        let allCategories = [];
-        let categoryToDelete = null;
-        let categoriesDataTable = null;
+<script>
+    // Global variables
+    let allCategories = [];
+    let categoryToDelete = null;
+    let categoriesDataTable = null;
 
-        // Initialize DataTables
-        function initializeDataTable() {
+    // Check if DataTables is loaded
+    function isDataTablesLoaded() {
+        return typeof $.fn.DataTable !== 'undefined';
+    }
+
+    // Initialize DataTables
+    function initializeDataTable() {
+        if (!isDataTablesLoaded()) {
+            console.warn('DataTables not available, using basic table');
+            setupBasicTable();
+            return;
+        }
+
+        try {
             categoriesDataTable = $('#categoriesDataTable').DataTable({
                 processing: true,
                 serverSide: false,
@@ -279,260 +251,342 @@
                     }
                 }
             });
+
+            // Setup search
+            $('#searchCategories').on('keyup', function() {
+                categoriesDataTable.search(this.value).draw();
+            });
+        } catch (error) {
+            console.error('DataTables initialization error:', error);
+            setupBasicTable();
         }
+    }
 
-        // Load all categories
-        async function loadCategories() {
-            try {
-                showLoadingState();
-                
-                const response = await fetch('/api/category/getcategory');
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch categories');
-                }
+    // Basic table functionality as fallback
+    function setupBasicTable() {
+        console.log('Setting up basic table functionality');
+        
+        $('#searchCategories').on('keyup', function() {
+            const searchText = $(this).val().toLowerCase();
+            $('#categoriesTableBody tr').each(function() {
+                const rowText = $(this).text().toLowerCase();
+                $(this).toggle(rowText.indexOf(searchText) > -1);
+            });
+        });
+    }
 
-                const data = await response.json();
-                allCategories = data.categoriesWithCount || [];
-                
-                // Update stats
-                updateCategoryStats(allCategories);
-                
-                // Populate DataTable
-                if (!categoriesDataTable) {
-                    initializeDataTable();
-                }
-                
-                categoriesDataTable.clear();
-                categoriesDataTable.rows.add(allCategories);
-                categoriesDataTable.draw();
-
-                // Setup search
-                $('#searchCategories').on('keyup', function() {
-                    categoriesDataTable.search(this.value).draw();
-                });
-
-            } catch (error) {
-                console.error('Error loading categories:', error);
-                showAlert('Error loading categories. Please try again.', 'danger');
-                displayErrorState();
-            }
-        }
-
-        // Update category statistics
-        function updateCategoryStats(categories) {
-            const totalCategories = categories.length;
-            const totalProducts = categories.reduce((sum, category) => sum + (category.productCount || 0), 0);
-            const avgProducts = totalCategories > 0 ? (totalProducts / totalCategories).toFixed(1) : 0;
-
-            document.getElementById('totalCategoriesCount').textContent = totalCategories;
-            document.getElementById('totalProductsCount').textContent = totalProducts;
-            document.getElementById('avgProductsCount').textContent = avgProducts;
-        }
-
-        // Create new category
-        async function createCategory() {
-            const form = document.getElementById('createCategoryForm');
-            const submitBtn = document.getElementById('createCategoryBtn');
-            const spinner = submitBtn.querySelector('.spinner-border');
+    // Load all categories
+    async function loadCategories() {
+        try {
+            showLoadingState();
             
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const formData = new FormData(form);
-            const categoryData = {
-                name: formData.get('name'),
-                description: formData.get('description')
-            };
-
-            try {
-                submitBtn.disabled = true;
-                spinner.classList.remove('d-none');
-
-                const response = await fetch('/api/category/createcategory', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(categoryData)
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('Category created successfully!', 'success');
-                    $('#createCategoryModal').modal('hide');
-                    form.reset();
-                    loadCategories();
-                } else {
-                    showAlert(data.message || 'Error creating category', 'danger');
-                }
-            } catch (error) {
-                console.error('Create category error:', error);
-                showAlert('Network error. Please try again.', 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.classList.add('d-none');
-            }
-        }
-
-        // Edit category
-        async function editCategory(categoryId) {
-            const category = allCategories.find(c => c._id === categoryId);
-            if (!category) return;
-
-            document.getElementById('editCategoryId').value = category._id;
-            document.getElementById('editCategoryName').value = category.name;
-            document.getElementById('editCategoryDescription').value = category.description;
-
-            $('#editCategoryModal').modal('show');
-        }
-
-        // Update category
-        async function updateCategory() {
-            const form = document.getElementById('editCategoryForm');
-            const submitBtn = document.getElementById('updateCategoryBtn');
-            const spinner = submitBtn.querySelector('.spinner-border');
+            const response = await fetch('/api/category/getcategory');
             
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
+            if (!response.ok) {
+                throw new Error('Failed to fetch categories');
             }
 
-            const categoryId = document.getElementById('editCategoryId').value;
-            const updateData = {
-                name: document.getElementById('editCategoryName').value,
-                description: document.getElementById('editCategoryDescription').value
-            };
+            const data = await response.json();
+            allCategories = data.categoriesWithCount || [];
+            
+            // Update stats
+            updateCategoryStats(allCategories);
+            
+            // Populate table
+            populateCategoriesTable(allCategories);
 
-            try {
-                submitBtn.disabled = true;
-                spinner.classList.remove('d-none');
-
-                const response = await fetch(`/api/category/updateCategory`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        CategoryId: categoryId,
-                        updatedCategory: updateData
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('Category updated successfully!', 'success');
-                    $('#editCategoryModal').modal('hide');
-                    loadCategories();
-                } else {
-                    showAlert(data.message || 'Error updating category', 'danger');
-                }
-            } catch (error) {
-                showAlert('Network error. Please try again.', 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.classList.add('d-none');
-            }
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            showAlert('Error loading categories. Please try again.', 'danger');
+            displayErrorState();
         }
+    }
 
-        // Show delete confirmation
-        function showDeleteConfirmation(categoryId, categoryName) {
-            categoryToDelete = categoryId;
-            document.getElementById('deleteCategoryName').textContent = categoryName;
-            $('#deleteCategoryModal').modal('show');
-        }
-
-        // Confirm delete
-        async function confirmDeleteCategory() {
-            if (!categoryToDelete) return;
-
-            const submitBtn = document.getElementById('confirmDeleteBtn');
-            const spinner = submitBtn.querySelector('.spinner-border');
-
-            try {
-                submitBtn.disabled = true;
-                spinner.classList.remove('d-none');
-
-                const response = await fetch(`/api/category/removecategory/${categoryToDelete}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('Category deleted successfully!', 'success');
-                    $('#deleteCategoryModal').modal('hide');
-                    loadCategories();
-                } else {
-                    showAlert(data.message || 'Error deleting category', 'danger');
-                }
-            } catch (error) {
-                console.error('Delete error:', error);
-                showAlert('Network error. Please try again.', 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.classList.add('d-none');
-                categoryToDelete = null;
-            }
-        }
-
-        // Refresh categories
-        function refreshCategories() {
-            loadCategories();
-            showAlert('Categories list refreshed', 'info');
-        }
-
-        // Utility functions
-        function showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show`;
-            alert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            alertContainer.appendChild(alert);
-            setTimeout(() => alert.remove(), 5000);
-        }
-
-        function showLoadingState() {
-            const tbody = document.getElementById('categoriesTableBody');
+    // Populate categories table
+    function populateCategoriesTable(categories) {
+        const tbody = document.getElementById('categoriesTableBody');
+        
+        if (categories.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading categories...</span>
+                        <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                        <div>No categories found</div>
+                        <p class="text-muted mt-2">Create your first category to get started</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        categories.forEach((category, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="fw-semibold">${escapeHtml(category.name)}</div>
+                    </td>
+                    <td>
+                        <div class="text-muted">${escapeHtml(category.description || 'No description')}</div>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary">${category.productCount || 0} products</span>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="editCategory('${category._id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="showDeleteConfirmation('${category._id}', '${escapeHtml(category.name)}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
-                        <div class="mt-2 text-muted">Loading categories...</div>
                     </td>
                 </tr>
             `;
+        });
+        
+        tbody.innerHTML = html;
+
+        // Initialize DataTables after populating data
+        if (!categoriesDataTable && isDataTablesLoaded()) {
+            initializeDataTable();
+        }
+    }
+
+    // Utility function to escape HTML
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Update category statistics
+    function updateCategoryStats(categories) {
+        const totalCategories = categories.length;
+        const totalProducts = categories.reduce((sum, category) => sum + (category.productCount || 0), 0);
+        const avgProducts = totalCategories > 0 ? (totalProducts / totalCategories).toFixed(1) : 0;
+
+        document.getElementById('totalCategoriesCount').textContent = totalCategories;
+        document.getElementById('totalProductsCount').textContent = totalProducts;
+        document.getElementById('avgProductsCount').textContent = avgProducts;
+    }
+
+    // Create new category
+    async function createCategory() {
+        const form = document.getElementById('createCategoryForm');
+        const submitBtn = document.getElementById('createCategoryBtn');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
         }
 
-        function displayErrorState() {
-            const tbody = document.getElementById('categoriesTableBody');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center py-4">
-                        <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
-                        <div>Failed to load categories</div>
-                        <button class="btn btn-primary mt-2" onclick="loadCategories()">
-                            <i class="fas fa-redo"></i> Try Again
-                        </button>
-                    </td>
-                </tr>
-            `;
+        const formData = new FormData(form);
+        const categoryData = {
+            name: formData.get('name'),
+            description: formData.get('description')
+        };
+
+        try {
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            const response = await fetch('/api/category/createcategory', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(categoryData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('Category created successfully!', 'success');
+                $('#createCategoryModal').modal('hide');
+                form.reset();
+                loadCategories();
+            } else {
+                showAlert(data.message || 'Error creating category', 'danger');
+            }
+        } catch (error) {
+            console.error('Create category error:', error);
+            showAlert('Network error. Please try again.', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+        }
+    }
+
+    // Edit category
+    async function editCategory(categoryId) {
+        const category = allCategories.find(c => c._id === categoryId);
+        if (!category) return;
+
+        document.getElementById('editCategoryId').value = category._id;
+        document.getElementById('editCategoryName').value = category.name;
+        document.getElementById('editCategoryDescription').value = category.description;
+
+        $('#editCategoryModal').modal('show');
+    }
+
+    // Update category
+    async function updateCategory() {
+        const form = document.getElementById('editCategoryForm');
+        const submitBtn = document.getElementById('updateCategoryBtn');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
         }
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        const categoryId = document.getElementById('editCategoryId').value;
+        const updateData = {
+            name: document.getElementById('editCategoryName').value,
+            description: document.getElementById('editCategoryDescription').value
+        };
+
+        try {
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            const response = await fetch(`/api/category/updateCategory`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    CategoryId: categoryId,
+                    updatedCategory: updateData
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('Category updated successfully!', 'success');
+                $('#editCategoryModal').modal('hide');
+                loadCategories();
+            } else {
+                showAlert(data.message || 'Error updating category', 'danger');
+            }
+        } catch (error) {
+            showAlert('Network error. Please try again.', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+        }
+    }
+
+    // Show delete confirmation
+    function showDeleteConfirmation(categoryId, categoryName) {
+        categoryToDelete = categoryId;
+        document.getElementById('deleteCategoryName').textContent = categoryName;
+        $('#deleteCategoryModal').modal('show');
+    }
+
+    // Confirm delete
+    async function confirmDeleteCategory() {
+        if (!categoryToDelete) return;
+
+        const submitBtn = document.getElementById('confirmDeleteBtn');
+        const spinner = submitBtn.querySelector('.spinner-border');
+
+        try {
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            const response = await fetch(`/api/category/removecategory/${categoryToDelete}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('Category deleted successfully!', 'success');
+                $('#deleteCategoryModal').modal('hide');
+                loadCategories();
+            } else {
+                showAlert(data.message || 'Error deleting category', 'danger');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showAlert('Network error. Please try again.', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+            categoryToDelete = null;
+        }
+    }
+
+    // Refresh categories
+    function refreshCategories() {
+        loadCategories();
+        showAlert('Categories list refreshed', 'info');
+    }
+
+    // Utility functions
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alert);
+        setTimeout(() => alert.remove(), 5000);
+    }
+
+    function showLoadingState() {
+        const tbody = document.getElementById('categoriesTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading categories...</span>
+                    </div>
+                    <div class="mt-2 text-muted">Loading categories...</div>
+                </td>
+            </tr>
+        `;
+    }
+
+    function displayErrorState() {
+        const tbody = document.getElementById('categoriesTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                    <div>Failed to load categories</div>
+                    <button class="btn btn-primary mt-2" onclick="loadCategories()">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for jQuery to be ready
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery is not loaded');
+            displayErrorState();
+            return;
+        }
+        
+        $(document).ready(function() {
             initializeDataTable();
             loadCategories();
         });
-    </script>
-</body>
-</html>
+    });
+</script>
