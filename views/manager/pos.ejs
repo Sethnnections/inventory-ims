@@ -1,144 +1,464 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS System - Inventory Management</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <title>Pos Management</title>
     <style>
+        /* POS Specific Styles - Dark Green & Gold Theme */
         .pos-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            min-height: 150vh;
         }
+
         .pos-card {
-            background: white;
+             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #cba130;
+            margin: 2px;
+            Padding: 2px;
         }
+
+        .pos-card-header {
+            background: linear-gradient(135deg, #0d3b2e 0%, #145c44 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 3px solid #cba130;
+        }
+
+        .pos-card-header h2 {
+            color: #cba130;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .pos-card-header p {
+            color: rgba(255,255,255,0.8);
+            margin: 0;
+        }
+
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 15px;
-            max-height: 60vh;
+            max-height: 65vh;
             overflow-y: auto;
+            padding: 1rem;
         }
+
         .product-card {
             border: 2px solid #e9ecef;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            overflow: hidden;
         }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0d3b2e, #cba130);
+        }
+
         .product-card:hover {
-            border-color: #0d6efd;
-            transform: translateY(-2px);
+            border-color: #cba130;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(203, 161, 48, 0.3);
         }
+
         .product-card img {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 10px;
+            border: 2px solid #e9ecef;
         }
+
+        .product-card h6 {
+            color: #193c2f;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .product-card .price {
+            color: #0d3b2e;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .product-card .stock {
+            color: #cba130;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .cart-section {
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #cba130;
+            margin: 2px;
+            Padding: 6px;
+        }
+
+        .cart-header {
+            background: linear-gradient(135deg, #0d3b2e 0%, #145c44 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 3px solid #cba130;
+        }
+
+        .cart-header h4 {
+            color: #cba130;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
         .cart-item {
-            border-bottom: 1px solid #e9ecef;
-            padding: 10px 0;
+            border-bottom: 2px solid #f8f9fa;
+            padding: 12px 0;
+            transition: all 0.3s ease;
         }
+
+        .cart-item:hover {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
         .quantity-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
+
         .quantity-btn {
-            width: 30px;
-            height: 30px;
-            border: 1px solid #dee2e6;
+            width: 32px;
+            height: 32px;
+            border: 2px solid #0d3b2e;
             background: white;
-            border-radius: 5px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            color: #0d3b2e;
+            font-weight: bold;
+            transition: all 0.3s ease;
         }
+
+        .quantity-btn:hover {
+            background: #0d3b2e;
+            color: white;
+        }
+
         .quantity-input {
-            width: 50px;
+            width: 60px;
             text-align: center;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 5px;
+            border: 2px solid #0d3b2e;
+            border-radius: 6px;
+            padding: 6px;
+            font-weight: 600;
+            color: #193c2f;
         }
+
         .payment-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid #cba130;
         }
+
+        .total-row {
+            background: #0d3b2e;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
         .stats-card {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid #cba130;
+            transition: all 0.3s ease;
         }
-        .receipt {
-            background: white;
-            border: 2px dashed #dee2e6;
-            border-radius: 10px;
-            padding: 20px;
-            font-family: 'Courier New', monospace;
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(203, 161, 48, 0.2);
         }
+
+        .stats-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #cba130;
+        }
+
+        .stats-card h3 {
+            color: #0d3b2e;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-card p {
+            color: #6c757d;
+            margin: 0;
+        }
+
         .btn-pos-primary {
-            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            background: linear-gradient(135deg, #cba130 0%, #b8942a 100%);
+            border: none;
+            color: #0d3b2e;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(203, 161, 48, 0.4);
+        }
+
+        .btn-pos-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(203, 161, 48, 0.6);
+            color: #0d3b2e;
+        }
+
+        .btn-pos-secondary {
+            background: linear-gradient(135deg, #0d3b2e 0%, #145c44 100%);
             border: none;
             color: white;
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 12px 25px;
+            font-size: 1rem;
             font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
-        .btn-pos-primary:hover {
-            background: linear-gradient(45deg, #0b5ed7, #0baccc);
+
+        .btn-pos-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 59, 46, 0.4);
             color: white;
         }
+
         .search-box {
             position: relative;
         }
+
         .search-box i {
             position: absolute;
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #6c757d;
+            color: #cba130;
+            z-index: 2;
         }
+
         .search-box input {
             padding-left: 45px;
+            border: 2px solid #0d3b2e;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .search-box input:focus {
+            border-color: #cba130;
+            box-shadow: 0 0 0 0.2rem rgba(203, 161, 48, 0.25);
+        }
+
+        .form-select {
+            border: 2px solid #0d3b2e;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .form-select:focus {
+            border-color: #cba130;
+            box-shadow: 0 0 0 0.2rem rgba(203, 161, 48, 0.25);
+        }
+
+        .form-control {
+            border: 2px solid #0d3b2e;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .form-control:focus {
+            border-color: #cba130;
+            box-shadow: 0 0 0 0.2rem rgba(203, 161, 48, 0.25);
+        }
+
+        .receipt {
+            background: white;
+            border: 3px solid #cba130;
+            border-radius: 12px;
+            padding: 2rem;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #cba130;
+            padding-bottom: 1rem;
+        }
+
+        .receipt-header h4 {
+            color: #0d3b2e;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .receipt-header p {
+            color: #cba130;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Custom scrollbar */
+        .product-grid::-webkit-scrollbar,
+        .cart-items::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .product-grid::-webkit-scrollbar-track,
+        .cart-items::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .product-grid::-webkit-scrollbar-thumb,
+        .cart-items::-webkit-scrollbar-thumb {
+            background: #cba130;
+            border-radius: 4px;
+        }
+
+        .product-grid::-webkit-scrollbar-thumb:hover,
+        .cart-items::-webkit-scrollbar-thumb:hover {
+            background: #b8942a;
+        }
+
+        /* Badge styles */
+        .badge-pos {
+            background: linear-gradient(135deg, #cba130, #b8942a);
+            color: #0d3b2e;
+            font-weight: 700;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Add to your existing CSS */
+.highlight-cart {
+    animation: pulse-cart 1s ease-in-out;
+}
+
+@keyframes pulse-cart {
+    0% { box-shadow: 0 0 0 0 rgba(203, 161, 48, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(203, 161, 48, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(203, 161, 48, 0); }
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.product-card {
+    transition: all 0.3s ease;
+}
+
+.alert {
+    border-radius: 10px;
+    border: 2px solid transparent;
+}
+
+.alert-success {
+    border-color: #198754;
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+}
+
+.alert-danger {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #f8d7da, #f1b0b7);
+}
+
+.alert-warning {
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+}
+
+.alert-info {
+    border-color: #0dcaf0;
+    background: linear-gradient(135deg, #d1ecf1, #b8e3ea);
+}
+
+        /* Animation for cart items */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .cart-item {
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                max-height: 50vh;
+            }
+            
+            .stats-card {
+                margin-bottom: 1rem;
+            }
         }
     </style>
-</head>
-<body>
+
     <div class="pos-container">
-        <div class="container-fluid py-4">
+        <div class="container-fluid py-1">
             <!-- Header -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="pos-card">
-                        <div class="card-body">
+                        <div class="pos-card-header">
                             <div class="row align-items-center">
                                 <div class="col-md-6">
-                                    <h2 class="mb-1"><i class="fas fa-cash-register me-2"></i>Point of Sale</h2>
-                                    <p class="text-muted mb-0">Process sales and manage transactions</p>
+                                    <h2><i class="fas fa-cash-register me-2"></i>Point of Sale</h2>
+                                    <p>Process sales and manage transactions in real-time</p>
                                 </div>
                                 <div class="col-md-6 text-end">
                                     <div class="btn-group">
-                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#salesReportModal">
-                                            <i class="fas fa-chart-bar me-2"></i>Reports
+                                        <button class="btn btn-pos-secondary me-2" data-bs-toggle="modal" data-bs-target="#salesReportModal">
+                                            <i class="fas fa-chart-bar me-2"></i>Sales Reports
                                         </button>
-                                        <button class="btn btn-outline-success" onclick="loadTodaySales()">
+                                        <button class="btn btn-pos-secondary" onclick="loadTodaySales()">
                                             <i class="fas fa-sync-alt me-2"></i>Refresh
                                         </button>
                                     </div>
@@ -151,18 +471,21 @@
 
             <div class="row">
                 <!-- Products Section -->
-                <div class="col-lg-8">
+                <div class="col-lg-8 mb-4">
                     <div class="pos-card">
-                        <div class="card-body">
+                        <div class="pos-card-header">
+                            <h4><i class="fas fa-boxes me-2"></i>Available Products</h4>
+                        </div>
+                        <div class="card-body p-0">
                             <!-- Search and Filters -->
-                            <div class="row mb-4">
-                                <div class="col-md-6">
+                            <div class="row p-3">
+                                <div class="col-md-6 mb-3">
                                     <div class="search-box">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" class="form-control" id="productSearch" placeholder="Search products...">
+                                        <input type="text" class="form-control" id="productSearch" placeholder="Search products by name...">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6 mb-3">
                                     <select class="form-select" id="categoryFilter">
                                         <option value="">All Categories</option>
                                     </select>
@@ -172,6 +495,10 @@
                             <!-- Products Grid -->
                             <div class="product-grid" id="productsGrid">
                                 <!-- Products will be loaded here -->
+                                <div class="text-center py-5">
+                                    <i class="fas fa-spinner fa-spin fa-2x text-gold mb-3"></i>
+                                    <p class="text-muted">Loading products...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -179,27 +506,30 @@
 
                 <!-- Cart Section -->
                 <div class="col-lg-4">
-                    <div class="pos-card">
-                        <div class="card-body">
-                            <h4 class="mb-4">
+                    <div class="cart-section sticky-top" style="top: 20px;">
+                        <div class="cart-header">
+                            <h4>
                                 <i class="fas fa-shopping-cart me-2"></i>
                                 Current Sale
-                                <span class="badge bg-primary ms-2" id="cartCount">0</span>
+                                <span class="badge-pos ms-2" id="cartCount">0</span>
                             </h4>
-
+                        </div>
+                        
+                        <div class="card-body">
                             <!-- Cart Items -->
-                            <div class="cart-items mb-4" id="cartItems" style="max-height: 300px; overflow-y: auto;">
-                                <div class="text-center text-muted py-4">
-                                    <i class="fas fa-cart-plus fa-2x mb-2"></i>
+                            <div class="cart-items mb-4" id="cartItems">
+                                <div class="text-center text-muted py-5">
+                                    <i class="fas fa-cart-plus fa-3x mb-3" style="color: #cba130;"></i>
                                     <p>No items in cart</p>
+                                    <small>Click on products to add them to cart</small>
                                 </div>
                             </div>
 
                             <!-- Totals -->
                             <div class="payment-section mb-4">
                                 <div class="row mb-2">
-                                    <div class="col-6">Subtotal:</div>
-                                    <div class="col-6 text-end">MK <span id="subtotal">0.00</span></div>
+                                    <div class="col-6"><strong>Subtotal:</strong></div>
+                                    <div class="col-6 text-end"><strong>MK <span id="subtotal">0.00</span></strong></div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-6">
@@ -217,35 +547,37 @@
                                     </div>
                                     <div class="col-6 text-end">MK <span id="discountAmount">0.00</span></div>
                                 </div>
-                                <hr>
-                                <div class="row mb-3">
-                                    <div class="col-6"><strong>Total:</strong></div>
-                                    <div class="col-6 text-end"><strong>MK <span id="totalAmount">0.00</span></strong></div>
+                                
+                                <div class="total-row">
+                                    <div class="row">
+                                        <div class="col-6"><strong>TOTAL:</strong></div>
+                                        <div class="col-6 text-end"><strong>MK <span id="totalAmount">0.00</span></strong></div>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Customer Info -->
                             <div class="mb-4">
-                                <label class="form-label">Customer Information (Optional)</label>
+                                <label class="form-label fw-bold" style="color: #0d3b2e;">Customer Information (Optional)</label>
                                 <input type="text" class="form-control mb-2" id="customerName" placeholder="Customer Name">
                                 <input type="text" class="form-control" id="customerPhone" placeholder="Phone Number">
                             </div>
 
                             <!-- Payment Method -->
                             <div class="mb-4">
-                                <label class="form-label">Payment Method</label>
+                                <label class="form-label fw-bold" style="color: #0d3b2e;">Payment Method</label>
                                 <select class="form-select" id="paymentMethod">
-                                    <option value="cash">Cash</option>
-                                    <option value="card">Card</option>
-                                    <option value="mobile">Mobile Money</option>
-                                    <option value="bank">Bank Transfer</option>
+                                    <option value="cash">💵 Cash</option>
+                                    <option value="card">💳 Card</option>
+                                    <option value="mobile">📱 Mobile Money</option>
+                                    <option value="bank">🏦 Bank Transfer</option>
                                 </select>
                             </div>
 
                             <!-- Actions -->
                             <div class="d-grid gap-2">
                                 <button class="btn btn-pos-primary btn-lg" onclick="processSale()">
-                                    <i class="fas fa-credit-card me-2"></i>Process Payment
+                                    <i class="fas fa-credit-card me-2"></i>PROCESS PAYMENT
                                 </button>
                                 <button class="btn btn-outline-danger" onclick="clearCart()">
                                     <i class="fas fa-trash me-2"></i>Clear Cart
@@ -260,30 +592,30 @@
             <div class="row mt-4">
                 <div class="col-md-3">
                     <div class="stats-card">
-                        <i class="fas fa-shopping-cart fa-2x text-primary mb-2"></i>
+                        <i class="fas fa-shopping-cart"></i>
                         <h3 id="todayTransactions">0</h3>
                         <p class="text-muted mb-0">Today's Transactions</p>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stats-card">
-                        <i class="fas fa-money-bill-wave fa-2x text-success mb-2"></i>
+                        <i class="fas fa-money-bill-wave"></i>
                         <h3 id="todayRevenue">MK 0.00</h3>
                         <p class="text-muted mb-0">Today's Revenue</p>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stats-card">
-                        <i class="fas fa-cube fa-2x text-info mb-2"></i>
+                        <i class="fas fa-cube"></i>
                         <h3 id="totalProducts">0</h3>
                         <p class="text-muted mb-0">Available Products</p>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stats-card">
-                        <i class="fas fa-users fa-2x text-warning mb-2"></i>
+                        <i class="fas fa-chart-line"></i>
                         <h3 id="activeCustomers">-</h3>
-                        <p class="text-muted mb-0">Active Now</p>
+                        <p class="text-muted mb-0">Sales Performance</p>
                     </div>
                 </div>
             </div>
@@ -294,9 +626,9 @@
     <div class="modal fade" id="salesReportModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sales Reports & Analytics</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header" style="background: linear-gradient(135deg, #0d3b2e 0%, #145c44 100%); color: white; border-bottom: 3px solid #cba130;">
+                    <h5 class="modal-title"><i class="fas fa-chart-bar me-2"></i>Sales Reports & Analytics</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row mb-4">
@@ -309,7 +641,7 @@
                             </select>
                         </div>
                         <div class="col-md-8 text-end">
-                            <button class="btn btn-success" onclick="exportSalesReport()">
+                            <button class="btn btn-pos-primary" onclick="exportSalesReport()">
                                 <i class="fas fa-file-excel me-2"></i>Export Report
                             </button>
                         </div>
@@ -317,9 +649,11 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="card">
+                            <div class="card border-gold">
+                                <div class="card-header" style="background: #0d3b2e; color: white;">
+                                    <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Sales Summary</h6>
+                                </div>
                                 <div class="card-body">
-                                    <h6>Sales Summary</h6>
                                     <div id="salesSummary">
                                         <!-- Sales summary will be loaded here -->
                                     </div>
@@ -327,9 +661,11 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card">
+                            <div class="card border-gold">
+                                <div class="card-header" style="background: #0d3b2e; color: white;">
+                                    <h6 class="mb-0"><i class="fas fa-star me-2"></i>Top Selling Products</h6>
+                                </div>
                                 <div class="card-body">
-                                    <h6>Top Selling Products</h6>
                                     <div id="topProducts">
                                         <!-- Top products will be loaded here -->
                                     </div>
@@ -340,9 +676,11 @@
 
                     <div class="row mt-4">
                         <div class="col-12">
-                            <div class="card">
+                            <div class="card border-gold">
+                                <div class="card-header" style="background: #0d3b2e; color: white;">
+                                    <h6 class="mb-0"><i class="fas fa-history me-2"></i>Recent Transactions</h6>
+                                </div>
                                 <div class="card-body">
-                                    <h6>Recent Transactions</h6>
                                     <div class="table-responsive">
                                         <table class="table table-sm" id="recentSalesTable">
                                             <thead>
@@ -372,9 +710,9 @@
     <div class="modal fade" id="receiptModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sale Receipt</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header" style="background: linear-gradient(135deg, #0d3b2e 0%, #145c44 100%); color: white; border-bottom: 3px solid #cba130;">
+                    <h5 class="modal-title"><i class="fas fa-receipt me-2"></i>Sale Receipt</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="receipt" id="receiptContent">
@@ -382,10 +720,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="printReceipt()">
+                    <button class="btn btn-pos-primary" onclick="printReceipt()">
                         <i class="fas fa-print me-2"></i>Print Receipt
                     </button>
-                    <button class="btn btn-success" data-bs-dismiss="modal">
+                    <button class="btn btn-pos-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-check me-2"></i>Done
                     </button>
                 </div>
@@ -393,6 +731,7 @@
         </div>
     </div>
 
+  
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -400,119 +739,167 @@
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-
-    <script>
-        // Global variables
-        let products = [];
-        let cart = [];
-        let categories = [];
-
-        // Initialize POS
-        $(document).ready(function() {
-            loadProducts();
-            loadCategories();
-            loadTodaySales();
-            initializeEventHandlers();
+      <script>
+        // Add border-gold class for cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const goldCards = document.querySelectorAll('.border-gold');
+            goldCards.forEach(card => {
+                card.style.border = '2px solid #cba130';
+                card.style.borderRadius = '12px';
+            });
         });
 
-        // Load products for POS
-        function loadProducts() {
-            $.ajax({
-                url: '/api/product/getproducts',
-                type: 'GET',
-                success: function(response) {
-                    const items = Array.isArray(response)
-                        ? response
-                        : ((response && (response.products || response.Products || response.data || response.items)) || []);
-                    
-                    products = items;
-                    populateProductsGrid(items);
-                    $('#totalProducts').text(items.length);
-                },
-                error: function(xhr) {
-                    console.error('Error loading products:', xhr);
-                    showAlert('Error loading products', 'danger');
-                }
-            });
-        }
+        // Global variables
+let products = [];
+let cart = [];
+let categories = [];
+let isAddingToCart = false;
 
-        // Load categories
-        function loadCategories() {
-            $.ajax({
-                url: '/api/category/getcategory',
-                type: 'GET',
-                success: function(response) {
-                    categories = response.categoriesWithCount || [];
-                    populateCategoryFilter();
-                },
-                error: function(xhr) {
-                    console.error('Error loading categories:', xhr);
-                }
-            });
-        }
+// Initialize POS
+$(document).ready(function() {
+    loadProducts();
+    loadCategories();
+    loadTodaySales();
+    initializeEventHandlers();
+});
 
-        // Load today's sales
-        function loadTodaySales() {
-            $.ajax({
-                url: '/api/sales/today',
-                type: 'GET',
-                success: function(response) {
-                    $('#todayTransactions').text(response.totalTransactions);
-                    $('#todayRevenue').text('MK ' + response.totalSales.toFixed(2));
-                },
-                error: function(xhr) {
-                    console.error('Error loading today sales:', xhr);
-                }
-            });
-        }
-
-        // Populate products grid
-        function populateProductsGrid(products) {
-            const grid = $('#productsGrid');
-            grid.empty();
-
-            if (products.length === 0) {
-                grid.html('<div class="col-12 text-center py-4"><i class="fas fa-box-open fa-3x text-muted mb-3"></i><p>No products available</p></div>');
-                return;
-            }
-
-            products.forEach(product => {
-                const imageHtml = product.image ? 
-                    `<img src="${product.image}" alt="${product.name}" class="img-fluid">` :
-                    `<div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 60px; height: 60px;">
-                        <i class="fas fa-box text-muted"></i>
-                    </div>`;
-
-                const productCard = `
-                    <div class="product-card" onclick="addToCart('${product._id}')">
-                        ${imageHtml}
-                        <h6 class="mb-1">${product.name}</h6>
-                        <p class="text-success mb-1">MK ${Number(product.Price).toFixed(2)}</p>
-                        <small class="text-muted">In Stock</small>
-                    </div>
-                `;
-                grid.append(productCard);
-            });
-        }
-
-        // Populate category filter
-        function populateCategoryFilter() {
-            const select = $('#categoryFilter');
-            select.empty();
-            select.append('<option value="">All Categories</option>');
+// Load products for POS
+function loadProducts() {
+    $.ajax({
+        url: '/api/product/getproducts',
+        type: 'GET',
+        success: function(response) {
+            const items = Array.isArray(response)
+                ? response
+                : ((response && (response.products || response.Products || response.data || response.items)) || []);
             
-            categories.forEach(category => {
-                select.append(`<option value="${category._id}">${category.name}</option>`);
-            });
+            products = items;
+            populateProductsGrid(items);
+            $('#totalProducts').text(items.length);
+        },
+        error: function(xhr) {
+            console.error('Error loading products:', xhr);
+            showAlert('Error loading products', 'danger');
         }
+    });
+}
 
-        // Add product to cart
-        function addToCart(productId) {
-            const product = products.find(p => p._id === productId);
-            if (!product) return;
+// Load categories
+function loadCategories() {
+    $.ajax({
+        url: '/api/category/getcategory',
+        type: 'GET',
+        success: function(response) {
+            categories = response.categoriesWithCount || [];
+            populateCategoryFilter();
+        },
+        error: function(xhr) {
+            console.error('Error loading categories:', xhr);
+        }
+    });
+}
 
-            const existingItem = cart.find(item => item.product === productId);
-            
+// Load today's sales
+function loadTodaySales() {
+    $.ajax({
+        url: '/api/sales/today',
+        type: 'GET',
+        success: function(response) {
+            $('#todayTransactions').text(response.totalTransactions);
+            $('#todayRevenue').text('MK ' + response.totalSales.toFixed(2));
+        },
+        error: function(xhr) {
+            console.error('Error loading today sales:', xhr);
+        }
+    });
+}
+
+// Populate products grid
+function populateProductsGrid(products) {
+    const grid = $('#productsGrid');
+    grid.empty();
+
+    if (products.length === 0) {
+        grid.html('<div class="col-12 text-center py-4"><i class="fas fa-box-open fa-3x text-muted mb-3"></i><p>No products available</p></div>');
+        return;
+    }
+
+    products.forEach(product => {
+        const imageHtml = product.image ? 
+            `<img src="${product.image}" alt="${product.name}" class="img-fluid">` :
+            `<div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 60px; height: 60px;">
+                <i class="fas fa-box text-muted"></i>
+            </div>`;
+
+        // Check stock availability
+        const isOutOfStock = product.quantity <= 0;
+        const stockStatus = isOutOfStock ? 
+            `<small class="text-danger"><i class="fas fa-times-circle me-1"></i>Out of Stock</small>` :
+            `<small class="text-success"><i class="fas fa-check-circle me-1"></i>In Stock: ${product.quantity}</small>`;
+
+        const productCard = `
+            <div class="product-card ${isOutOfStock ? 'opacity-50' : ''}" 
+                 onclick="${isOutOfStock ? '' : `addToCart('${product._id}')`}">
+                ${imageHtml}
+                <h6 class="mb-1">${product.name}</h6>
+                <p class="text-success mb-1">MK ${Number(product.Price).toFixed(2)}</p>
+                ${stockStatus}
+            </div>
+        `;
+        grid.append(productCard);
+    });
+}
+
+// Populate category filter
+function populateCategoryFilter() {
+    const select = $('#categoryFilter');
+    select.empty();
+    select.append('<option value="">All Categories</option>');
+    
+    categories.forEach(category => {
+        select.append(`<option value="${category._id}">${category.name}</option>`);
+    });
+}
+
+// Add product to cart with loading and feedback
+function addToCart(productId) {
+    if (isAddingToCart) return; // Prevent multiple clicks
+    
+    const product = products.find(p => p._id === productId);
+    if (!product) return;
+
+    // Check stock availability
+    if (product.quantity <= 0) {
+        showAlert(`Insufficient stock for ${product.name}. Available: 0`, 'warning');
+        return;
+    }
+
+    // Check if already in cart and quantity would exceed stock
+    const existingItem = cart.find(item => item.product === productId);
+    const requestedQuantity = (existingItem ? existingItem.quantity : 0) + 1;
+    
+    if (requestedQuantity > product.quantity) {
+        showAlert(`Cannot add more ${product.name}. Available stock: ${product.quantity}`, 'warning');
+        return;
+    }
+
+    isAddingToCart = true;
+    
+    // Show loading feedback on the product card
+    const productCard = $(`.product-card:has([onclick*="${productId}"])`);
+    const originalContent = productCard.html();
+    
+    productCard.html(`
+        <div class="text-center py-3">
+            <i class="fas fa-spinner fa-spin text-gold mb-2"></i>
+            <p class="small mb-0">Adding...</p>
+        </div>
+    `);
+    productCard.css('pointer-events', 'none');
+
+    // Simulate API call delay (you can remove this in production)
+    setTimeout(() => {
+        try {
             if (existingItem) {
                 existingItem.quantity += 1;
                 existingItem.total = existingItem.quantity * existingItem.price;
@@ -522,302 +909,379 @@
                     name: product.name,
                     price: Number(product.Price),
                     quantity: 1,
-                    total: Number(product.Price)
+                    total: Number(product.Price),
+                    stock: product.quantity
                 });
             }
 
             updateCartDisplay();
             calculateTotals();
-        }
-
-        // Update cart display
-        function updateCartDisplay() {
-            const cartItems = $('#cartItems');
-            const cartCount = $('#cartCount');
             
-            cartItems.empty();
-            cartCount.text(cart.length);
-
-            if (cart.length === 0) {
-                cartItems.html(`
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-cart-plus fa-2x mb-2"></i>
-                        <p>No items in cart</p>
-                    </div>
-                `);
-                return;
-            }
-
-            cart.forEach((item, index) => {
-                const cartItem = `
-                    <div class="cart-item">
-                        <div class="row align-items-center">
-                            <div class="col-5">
-                                <h6 class="mb-0">${item.name}</h6>
-                                <small class="text-muted">MK ${item.price.toFixed(2)}</small>
-                            </div>
-                            <div class="col-4">
-                                <div class="quantity-controls">
-                                    <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
-                                    <input type="number" class="quantity-input" value="${item.quantity}" 
-                                           onchange="setQuantity(${index}, this.value)" min="1">
-                                    <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
-                                </div>
-                            </div>
-                            <div class="col-2 text-end">
-                                <h6 class="mb-0">MK ${item.total.toFixed(2)}</h6>
-                            </div>
-                            <div class="col-1 text-end">
-                                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                cartItems.append(cartItem);
-            });
-        }
-
-        // Update item quantity
-        function updateQuantity(index, change) {
-            cart[index].quantity += change;
+            // Show success feedback
+            showAlert(`✓ ${product.name} added to cart!`, 'success');
             
-            if (cart[index].quantity < 1) {
-                cart[index].quantity = 1;
-            }
-            
-            cart[index].total = cart[index].quantity * cart[index].price;
-            updateCartDisplay();
-            calculateTotals();
-        }
-
-        // Set specific quantity
-        function setQuantity(index, quantity) {
-            quantity = parseInt(quantity) || 1;
-            if (quantity < 1) quantity = 1;
-            
-            cart[index].quantity = quantity;
-            cart[index].total = cart[index].quantity * cart[index].price;
-            updateCartDisplay();
-            calculateTotals();
-        }
-
-        // Remove item from cart
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartDisplay();
-            calculateTotals();
-        }
-
-        // Clear cart
-        function clearCart() {
-            if (cart.length === 0) return;
-            
-            if (confirm('Are you sure you want to clear the cart?')) {
-                cart = [];
-                updateCartDisplay();
-                calculateTotals();
-                showAlert('Cart cleared', 'info');
-            }
-        }
-
-        // Calculate totals
-        function calculateTotals() {
-            const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-            const tax = parseFloat($('#taxInput').val()) || 0;
-            const discount = parseFloat($('#discountInput').val()) || 0;
-            const total = subtotal + tax - discount;
-
-            $('#subtotal').text(subtotal.toFixed(2));
-            $('#taxAmount').text(tax.toFixed(2));
-            $('#discountAmount').text(discount.toFixed(2));
-            $('#totalAmount').text(total.toFixed(2));
-        }
-
-        // Process sale
-        function processSale() {
-            if (cart.length === 0) {
-                showAlert('Please add items to cart before processing sale', 'warning');
-                return;
-            }
-
-            const customer = {
-                name: $('#customerName').val().trim(),
-                phone: $('#customerPhone').val().trim()
-            };
-
-            const saleData = {
-                customer: customer.name || customer.phone ? customer : undefined,
-                items: cart.map(item => ({
-                    product: item.product,
-                    quantity: item.quantity
-                })),
-                tax: parseFloat($('#taxInput').val()) || 0,
-                discount: parseFloat($('#discountInput').val()) || 0,
-                paymentMethod: $('#paymentMethod').val(),
-                notes: 'POS Sale'
-            };
-
-            $.ajax({
-                url: '/api/sales',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(saleData),
-                success: function(response) {
-                    showAlert('Sale processed successfully!', 'success');
-                    generateReceipt(response.sale);
-                    clearCart();
-                    loadTodaySales();
-                },
-                error: function(xhr) {
-                    const error = xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error';
-                    showAlert('Error processing sale: ' + error, 'danger');
-                }
-            });
-        }
-
-        // Generate receipt
-        function generateReceipt(sale) {
-            const receiptContent = $('#receiptContent');
-            receiptContent.empty();
-
-            const receiptHtml = `
-                <div class="text-center mb-3">
-                    <h4>INVENTORY SYSTEM</h4>
-                    <p>POS Receipt</p>
-                </div>
-                
-                <div class="row mb-2">
-                    <div class="col-6">Receipt #:</div>
-                    <div class="col-6 text-end">${sale.saleNumber}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-6">Date:</div>
-                    <div class="col-6 text-end">${new Date(sale.createdAt).toLocaleString()}</div>
-                </div>
-                
-                ${sale.customer && sale.customer.name ? `
-                <div class="row mb-2">
-                    <div class="col-6">Customer:</div>
-                    <div class="col-6 text-end">${sale.customer.name}</div>
-                </div>
-                ` : ''}
-                
-                <hr>
-                
-                <div class="mb-3">
-                    ${sale.items.map(item => `
-                        <div class="row mb-1">
-                            <div class="col-6">${item.product.name} x${item.quantity}</div>
-                            <div class="col-6 text-end">MK ${item.total.toFixed(2)}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <hr>
-                
-                <div class="row mb-1">
-                    <div class="col-6">Subtotal:</div>
-                    <div class="col-6 text-end">MK ${sale.subtotal.toFixed(2)}</div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-6">Tax:</div>
-                    <div class="col-6 text-end">MK ${sale.tax.toFixed(2)}</div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-6">Discount:</div>
-                    <div class="col-6 text-end">MK ${sale.discount.toFixed(2)}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-6"><strong>Total:</strong></div>
-                    <div class="col-6 text-end"><strong>MK ${sale.total.toFixed(2)}</strong></div>
-                </div>
-                
-                <hr>
-                
-                <div class="row mb-1">
-                    <div class="col-6">Payment Method:</div>
-                    <div class="col-6 text-end">${sale.paymentMethod.toUpperCase()}</div>
-                </div>
-                
-                <div class="text-center mt-4">
-                    <p>Thank you for your business!</p>
-                </div>
-            `;
-
-            receiptContent.html(receiptHtml);
-            $('#receiptModal').modal('show');
-        }
-
-        // Print receipt
-        function printReceipt() {
-            const receiptContent = document.getElementById('receiptContent').innerHTML;
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Receipt</title>
-                        <style>
-                            body { font-family: 'Courier New', monospace; padding: 20px; }
-                            .text-center { text-align: center; }
-                            .text-end { text-align: right; }
-                            .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-                            hr { border: 1px dashed #000; margin: 10px 0; }
-                        </style>
-                    </head>
-                    <body>${receiptContent}</body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        // Initialize event handlers
-        function initializeEventHandlers() {
-            $('#taxInput, #discountInput').on('input', calculateTotals);
-            
-            $('#productSearch').on('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const filteredProducts = products.filter(product => 
-                    product.name.toLowerCase().includes(searchTerm)
-                );
-                populateProductsGrid(filteredProducts);
-            });
-
-            $('#categoryFilter').on('change', function() {
-                const categoryId = this.value;
-                const filteredProducts = categoryId ? 
-                    products.filter(product => product.Category && product.Category._id === categoryId) : 
-                    products;
-                populateProductsGrid(filteredProducts);
-            });
-        }
-
-        // Show alert
-        function showAlert(message, type) {
-            const alertClass = type === 'success' ? 'alert-success' : 
-                             type === 'danger' ? 'alert-danger' :
-                             type === 'warning' ? 'alert-warning' : 'alert-info';
-            
-            const alertHtml = `
-                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            
-            // Remove existing alerts
-            $('.alert').remove();
-            
-            // Add new alert
-            $('.container-fluid').prepend(alertHtml);
-            
-            // Auto remove after 5 seconds
+            // Add visual feedback to cart
+            const cartSection = $('.cart-section');
+            cartSection.addClass('highlight-cart');
             setTimeout(() => {
-                $('.alert').alert('close');
-            }, 5000);
+                cartSection.removeClass('highlight-cart');
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            showAlert('Error adding item to cart', 'danger');
+        } finally {
+            // Restore product card
+            productCard.html(originalContent);
+            productCard.css('pointer-events', 'auto');
+            isAddingToCart = false;
         }
+    }, 500);
+}
+
+// Update cart display
+function updateCartDisplay() {
+    const cartItems = $('#cartItems');
+    const cartCount = $('#cartCount');
+    
+    cartItems.empty();
+    cartCount.text(cart.reduce((total, item) => total + item.quantity, 0));
+
+    if (cart.length === 0) {
+        cartItems.html(`
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-cart-plus fa-2x mb-2"></i>
+                <p>No items in cart</p>
+            </div>
+        `);
+        return;
+    }
+
+    cart.forEach((item, index) => {
+        const stockWarning = item.quantity >= item.stock ? 
+            `<small class="text-warning d-block"><i class="fas fa-exclamation-triangle me-1"></i>Max stock reached</small>` : '';
+        
+        const cartItem = `
+            <div class="cart-item">
+                <div class="row align-items-center">
+                    <div class="col-5">
+                        <h6 class="mb-0">${item.name}</h6>
+                        <small class="text-muted">MK ${item.price.toFixed(2)}</small>
+                        ${stockWarning}
+                    </div>
+                    <div class="col-4">
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                            <input type="number" class="quantity-input" value="${item.quantity}" 
+                                   onchange="setQuantity(${index}, this.value)" min="1" max="${item.stock}">
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="col-2 text-end">
+                        <h6 class="mb-0">MK ${item.total.toFixed(2)}</h6>
+                    </div>
+                    <div class="col-1 text-end">
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        cartItems.append(cartItem);
+    });
+}
+
+// Update item quantity
+function updateQuantity(index, change) {
+    const newQuantity = cart[index].quantity + change;
+    
+    if (newQuantity < 1) {
+        showAlert('Quantity cannot be less than 1', 'warning');
+        return;
+    }
+    
+    if (newQuantity > cart[index].stock) {
+        showAlert(`Cannot add more ${cart[index].name}. Available stock: ${cart[index].stock}`, 'warning');
+        return;
+    }
+    
+    cart[index].quantity = newQuantity;
+    cart[index].total = cart[index].quantity * cart[index].price;
+    updateCartDisplay();
+    calculateTotals();
+}
+
+// Set specific quantity
+function setQuantity(index, quantity) {
+    quantity = parseInt(quantity) || 1;
+    
+    if (quantity < 1) {
+        showAlert('Quantity cannot be less than 1', 'warning');
+        quantity = 1;
+    }
+    
+    if (quantity > cart[index].stock) {
+        showAlert(`Cannot set quantity to ${quantity} for ${cart[index].name}. Available stock: ${cart[index].stock}`, 'warning');
+        quantity = cart[index].stock;
+    }
+    
+    cart[index].quantity = quantity;
+    cart[index].total = cart[index].quantity * cart[index].price;
+    updateCartDisplay();
+    calculateTotals();
+}
+
+// Remove item from cart
+function removeFromCart(index) {
+    const itemName = cart[index].name;
+    cart.splice(index, 1);
+    updateCartDisplay();
+    calculateTotals();
+    showAlert(`✗ ${itemName} removed from cart`, 'info');
+}
+
+// Clear cart
+function clearCart() {
+    if (cart.length === 0) return;
+    
+    if (confirm('Are you sure you want to clear the cart?')) {
+        cart = [];
+        updateCartDisplay();
+        calculateTotals();
+        showAlert('Cart cleared successfully', 'info');
+    }
+}
+
+// Calculate totals
+function calculateTotals() {
+    const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+    const tax = parseFloat($('#taxInput').val()) || 0;
+    const discount = parseFloat($('#discountInput').val()) || 0;
+    const total = subtotal + tax - discount;
+
+    $('#subtotal').text(subtotal.toFixed(2));
+    $('#taxAmount').text(tax.toFixed(2));
+    $('#discountAmount').text(discount.toFixed(2));
+    $('#totalAmount').text(total.toFixed(2));
+}
+
+// Process sale
+function processSale() {
+    if (cart.length === 0) {
+        showAlert('Please add items to cart before processing sale', 'warning');
+        return;
+    }
+
+    // Check stock availability before processing
+    const outOfStockItems = cart.filter(item => item.quantity > item.stock);
+    if (outOfStockItems.length > 0) {
+        const itemNames = outOfStockItems.map(item => item.name).join(', ');
+        showAlert(`Insufficient stock for: ${itemNames}`, 'danger');
+        return;
+    }
+
+    const customer = {
+        name: $('#customerName').val().trim(),
+        phone: $('#customerPhone').val().trim()
+    };
+
+    const saleData = {
+        customer: customer.name || customer.phone ? customer : undefined,
+        items: cart.map(item => ({
+            product: item.product,
+            quantity: item.quantity
+        })),
+        tax: parseFloat($('#taxInput').val()) || 0,
+        discount: parseFloat($('#discountInput').val()) || 0,
+        paymentMethod: $('#paymentMethod').val(),
+        notes: 'POS Sale'
+    };
+
+    // Show processing state
+    const processBtn = $('button[onclick="processSale()"]');
+    const originalText = processBtn.html();
+    processBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>PROCESSING...');
+    processBtn.prop('disabled', true);
+
+    $.ajax({
+        url: '/api/sales',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(saleData),
+        success: function(response) {
+            showAlert('🎉 Sale processed successfully!', 'success');
+            generateReceipt(response.sale);
+            clearCart();
+            loadTodaySales();
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error';
+            
+            // Handle specific stock error
+            if (error.includes('Insufficient stock')) {
+                const productName = error.match(/for (.+)\. Available/)[1];
+                showAlert(`❌ ${error}. Please update your cart.`, 'danger');
+                
+                // Refresh products to get current stock
+                loadProducts();
+            } else {
+                showAlert('Error processing sale: ' + error, 'danger');
+            }
+        },
+        complete: function() {
+            // Restore button state
+            processBtn.html(originalText);
+            processBtn.prop('disabled', false);
+        }
+    });
+}
+
+// Generate receipt
+function generateReceipt(sale) {
+    const receiptContent = $('#receiptContent');
+    receiptContent.empty();
+
+    const receiptHtml = `
+        <div class="text-center mb-3">
+            <h4>THOMASI MAGOCHI INVENTORY SYSTEM</h4>
+            <p>POS Receipt</p>
+        </div>
+        
+        <div class="row mb-2">
+            <div class="col-6">Receipt #:</div>
+            <div class="col-6 text-end">${sale.saleNumber}</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-6">Date:</div>
+            <div class="col-6 text-end">${new Date(sale.createdAt).toLocaleString()}</div>
+        </div>
+        
+        ${sale.customer && sale.customer.name ? `
+        <div class="row mb-2">
+            <div class="col-6">Customer:</div>
+            <div class="col-6 text-end">${sale.customer.name}</div>
+        </div>
+        ` : ''}
+        
+        <hr>
+        
+        <div class="mb-3">
+            ${sale.items.map(item => `
+                <div class="row mb-1">
+                    <div class="col-6">${item.product.name} x${item.quantity}</div>
+                    <div class="col-6 text-end">MK ${item.total.toFixed(2)}</div>
+                </div>
+            `).join('')}
+        </div>
+        
+        <hr>
+        
+        <div class="row mb-1">
+            <div class="col-6">Subtotal:</div>
+            <div class="col-6 text-end">MK ${sale.subtotal.toFixed(2)}</div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-6">Tax:</div>
+            <div class="col-6 text-end">MK ${sale.tax.toFixed(2)}</div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-6">Discount:</div>
+            <div class="col-6 text-end">MK ${sale.discount.toFixed(2)}</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-6"><strong>Total:</strong></div>
+            <div class="col-6 text-end"><strong>MK ${sale.total.toFixed(2)}</strong></div>
+        </div>
+        
+        <hr>
+        
+        <div class="row mb-1">
+            <div class="col-6">Payment Method:</div>
+            <div class="col-6 text-end">${sale.paymentMethod.toUpperCase()}</div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <p>Thank you for your business!</p>
+        </div>
+    `;
+
+    receiptContent.html(receiptHtml);
+    $('#receiptModal').modal('show');
+}
+
+// Print receipt
+function printReceipt() {
+    const receiptContent = document.getElementById('receiptContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Receipt</title>
+                <style>
+                    body { font-family: 'Courier New', monospace; padding: 20px; }
+                    .text-center { text-align: center; }
+                    .text-end { text-align: right; }
+                    .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+                    hr { border: 1px dashed #000; margin: 10px 0; }
+                </style>
+            </head>
+            <body>${receiptContent}</body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Initialize event handlers
+function initializeEventHandlers() {
+    $('#taxInput, #discountInput').on('input', calculateTotals);
+    
+    $('#productSearch').on('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const filteredProducts = products.filter(product => 
+            product.name.toLowerCase().includes(searchTerm)
+        );
+        populateProductsGrid(filteredProducts);
+    });
+
+    $('#categoryFilter').on('change', function() {
+        const categoryId = this.value;
+        const filteredProducts = categoryId ? 
+            products.filter(product => product.Category && product.Category._id === categoryId) : 
+            products;
+        populateProductsGrid(filteredProducts);
+    });
+}
+
+// Show alert with improved styling
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                     type === 'danger' ? 'alert-danger' :
+                     type === 'warning' ? 'alert-warning' : 'alert-info';
+    
+    const icon = type === 'success' ? 'fa-check-circle' :
+                 type === 'danger' ? 'fa-exclamation-circle' :
+                 type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="fas ${icon} me-2 fa-lg"></i>
+            <div class="flex-grow-1">${message}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.container-fluid').prepend(alertHtml);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        $('.alert').alert('close');
+    }, 5000);
+}
     </script>
-</body>
-</html>
+   

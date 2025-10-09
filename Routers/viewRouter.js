@@ -88,7 +88,7 @@ router.get("/manager/inventory", authmiddleware, managermiddleware, (req, res) =
 
 router.get("/manager/pos", authmiddleware, managermiddleware, (req, res) => {
   res.render("manager/pos", { 
-    title: "pos Management",
+    title: "Pos Management",
     user: req.session.user,
     headerIcon: 'warehouse'
   });
