@@ -1,13 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const {createSale,getAllSales,SearchSales,getSaleById,updateSale} = require("../controller/salescontroller");
+const {
+  createSale,
+  createSaleSimple, // Add the simple version
+  getAllSales,
+  getSale,
+  getTodaySales,
+  getSalesStats
+} = require('../controller/salesController');
+const { authmiddleware } = require('../middleware/Authmiddleware');
 
-router.post("/createsales", createSale);
-router.get("/getallsales", getAllSales); 
-router.get("/searchdata", SearchSales); 
-router.get("/:saleId", getSaleById);
-router.put("/updatesales/:saleId",updateSale); 
-
-
+// Use the simple version for now to avoid validation issues
+router.post("/", authmiddleware, createSaleSimple);
+router.get("/", authmiddleware, getAllSales);
+router.get("/today", authmiddleware, getTodaySales);
+router.get("/stats", authmiddleware, getSalesStats);
+router.get("/:saleId", authmiddleware, getSale);
 
 module.exports = router;

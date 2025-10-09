@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS System - Inventory Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <style>
+        .pos-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .pos-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .product-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            border-color: #0d6efd;
+            transform: translateY(-2px);
+        }
+        .product-card img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .cart-item {
+            border-bottom: 1px solid #e9ecef;
+            padding: 10px 0;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        .payment-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .receipt {
+            background: white;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+        }
+        .btn-pos-primary {
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .btn-pos-primary:hover {
+            background: linear-gradient(45deg, #0b5ed7, #0baccc);
+            color: white;
+        }
+        .search-box {
+            position: relative;
+        }
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .search-box input {
+            padding-left: 45px;
+        }
+    </style>
+</head>
+<body>
+    <div class="pos-container">
+        <div class="container-fluid py-4">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="pos-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h2 class="mb-1"><i class="fas fa-cash-register me-2"></i>Point of Sale</h2>
+                                    <p class="text-muted mb-0">Process sales and manage transactions</p>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <div class="btn-group">
+                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#salesReportModal">
+                                            <i class="fas fa-chart-bar me-2"></i>Reports
+                                        </button>
+                                        <button class="btn btn-outline-success" onclick="loadTodaySales()">
+                                            <i class="fas fa-sync-alt me-2"></i>Refresh
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Products Section -->
+                <div class="col-lg-8">
+                    <div class="pos-card">
+                        <div class="card-body">
+                            <!-- Search and Filters -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="search-box">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" class="form-control" id="productSearch" placeholder="Search products...">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" id="categoryFilter">
+                                        <option value="">All Categories</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Products Grid -->
+                            <div class="product-grid" id="productsGrid">
+                                <!-- Products will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Section -->
+                <div class="col-lg-4">
+                    <div class="pos-card">
+                        <div class="card-body">
+                            <h4 class="mb-4">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Current Sale
+                                <span class="badge bg-primary ms-2" id="cartCount">0</span>
+                            </h4>
+
+                            <!-- Cart Items -->
+                            <div class="cart-items mb-4" id="cartItems" style="max-height: 300px; overflow-y: auto;">
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-cart-plus fa-2x mb-2"></i>
+                                    <p>No items in cart</p>
+                                </div>
+                            </div>
+
+                            <!-- Totals -->
+                            <div class="payment-section mb-4">
+                                <div class="row mb-2">
+                                    <div class="col-6">Subtotal:</div>
+                                    <div class="col-6 text-end">MK <span id="subtotal">0.00</span></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <small>Tax:</small>
+                                        <input type="number" class="form-control form-control-sm d-inline-block w-50 ms-2" 
+                                               id="taxInput" value="0" min="0" step="0.01">
+                                    </div>
+                                    <div class="col-6 text-end">MK <span id="taxAmount">0.00</span></div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <small>Discount:</small>
+                                        <input type="number" class="form-control form-control-sm d-inline-block w-50 ms-2" 
+                                               id="discountInput" value="0" min="0" step="0.01">
+                                    </div>
+                                    <div class="col-6 text-end">MK <span id="discountAmount">0.00</span></div>
+                                </div>
+                                <hr>
+                                <div class="row mb-3">
+                                    <div class="col-6"><strong>Total:</strong></div>
+                                    <div class="col-6 text-end"><strong>MK <span id="totalAmount">0.00</span></strong></div>
+                                </div>
+                            </div>
+
+                            <!-- Customer Info -->
+                            <div class="mb-4">
+                                <label class="form-label">Customer Information (Optional)</label>
+                                <input type="text" class="form-control mb-2" id="customerName" placeholder="Customer Name">
+                                <input type="text" class="form-control" id="customerPhone" placeholder="Phone Number">
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="mb-4">
+                                <label class="form-label">Payment Method</label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="mobile">Mobile Money</option>
+                                    <option value="bank">Bank Transfer</option>
+                                </select>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-pos-primary btn-lg" onclick="processSale()">
+                                    <i class="fas fa-credit-card me-2"></i>Process Payment
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="clearCart()">
+                                    <i class="fas fa-trash me-2"></i>Clear Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Sales Stats -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <i class="fas fa-shopping-cart fa-2x text-primary mb-2"></i>
+                        <h3 id="todayTransactions">0</h3>
+                        <p class="text-muted mb-0">Today's Transactions</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <i class="fas fa-money-bill-wave fa-2x text-success mb-2"></i>
+                        <h3 id="todayRevenue">MK 0.00</h3>
+                        <p class="text-muted mb-0">Today's Revenue</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <i class="fas fa-cube fa-2x text-info mb-2"></i>
+                        <h3 id="totalProducts">0</h3>
+                        <p class="text-muted mb-0">Available Products</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <i class="fas fa-users fa-2x text-warning mb-2"></i>
+                        <h3 id="activeCustomers">-</h3>
+                        <p class="text-muted mb-0">Active Now</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Report Modal -->
+    <div class="modal fade" id="salesReportModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sales Reports & Analytics</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <select class="form-select" id="reportPeriod">
+                                <option value="day">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="year">This Year</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8 text-end">
+                            <button class="btn btn-success" onclick="exportSalesReport()">
+                                <i class="fas fa-file-excel me-2"></i>Export Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Sales Summary</h6>
+                                    <div id="salesSummary">
+                                        <!-- Sales summary will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Top Selling Products</h6>
+                                    <div id="topProducts">
+                                        <!-- Top products will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Recent Transactions</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm" id="recentSalesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sale #</th>
+                                                    <th>Date</th>
+                                                    <th>Customer</th>
+                                                    <th>Amount</th>
+                                                    <th>Payment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Recent sales will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div class="modal fade" id="receiptModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sale Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="receipt" id="receiptContent">
+                        <!-- Receipt content will be generated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="printReceipt()">
+                        <i class="fas fa-print me-2"></i>Print Receipt
+                    </button>
+                    <button class="btn btn-success" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
+    <script>
+        // Global variables
+        let products = [];
+        let cart = [];
+        let categories = [];
+
+        // Initialize POS
+        $(document).ready(function() {
+            loadProducts();
+            loadCategories();
+            loadTodaySales();
+            initializeEventHandlers();
+        });
+
+        // Load products for POS
+        function loadProducts() {
+            $.ajax({
+                url: '/api/product/getproducts',
+                type: 'GET',
+                success: function(response) {
+                    const items = Array.isArray(response)
+                        ? response
+                        : ((response && (response.products || response.Products || response.data || response.items)) || []);
+                    
+                    products = items;
+                    populateProductsGrid(items);
+                    $('#totalProducts').text(items.length);
+                },
+                error: function(xhr) {
+                    console.error('Error loading products:', xhr);
+                    showAlert('Error loading products', 'danger');
+                }
+            });
+        }
+
+        // Load categories
+        function loadCategories() {
+            $.ajax({
+                url: '/api/category/getcategory',
+                type: 'GET',
+                success: function(response) {
+                    categories = response.categoriesWithCount || [];
+                    populateCategoryFilter();
+                },
+                error: function(xhr) {
+                    console.error('Error loading categories:', xhr);
+                }
+            });
+        }
+
+        // Load today's sales
+        function loadTodaySales() {
+            $.ajax({
+                url: '/api/sales/today',
+                type: 'GET',
+                success: function(response) {
+                    $('#todayTransactions').text(response.totalTransactions);
+                    $('#todayRevenue').text('MK ' + response.totalSales.toFixed(2));
+                },
+                error: function(xhr) {
+                    console.error('Error loading today sales:', xhr);
+                }
+            });
+        }
+
+        // Populate products grid
+        function populateProductsGrid(products) {
+            const grid = $('#productsGrid');
+            grid.empty();
+
+            if (products.length === 0) {
+                grid.html('<div class="col-12 text-center py-4"><i class="fas fa-box-open fa-3x text-muted mb-3"></i><p>No products available</p></div>');
+                return;
+            }
+
+            products.forEach(product => {
+                const imageHtml = product.image ? 
+                    `<img src="${product.image}" alt="${product.name}" class="img-fluid">` :
+                    `<div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 60px; height: 60px;">
+                        <i class="fas fa-box text-muted"></i>
+                    </div>`;
+
+                const productCard = `
+                    <div class="product-card" onclick="addToCart('${product._id}')">
+                        ${imageHtml}
+                        <h6 class="mb-1">${product.name}</h6>
+                        <p class="text-success mb-1">MK ${Number(product.Price).toFixed(2)}</p>
+                        <small class="text-muted">In Stock</small>
+                    </div>
+                `;
+                grid.append(productCard);
+            });
+        }
+
+        // Populate category filter
+        function populateCategoryFilter() {
+            const select = $('#categoryFilter');
+            select.empty();
+            select.append('<option value="">All Categories</option>');
+            
+            categories.forEach(category => {
+                select.append(`<option value="${category._id}">${category.name}</option>`);
+            });
+        }
+
+        // Add product to cart
+        function addToCart(productId) {
+            const product = products.find(p => p._id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.product === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+                existingItem.total = existingItem.quantity * existingItem.price;
+            } else {
+                cart.push({
+                    product: productId,
+                    name: product.name,
+                    price: Number(product.Price),
+                    quantity: 1,
+                    total: Number(product.Price)
+                });
+            }
+
+            updateCartDisplay();
+            calculateTotals();
+        }
+
+        // Update cart display
+        function updateCartDisplay() {
+            const cartItems = $('#cartItems');
+            const cartCount = $('#cartCount');
+            
+            cartItems.empty();
+            cartCount.text(cart.length);
+
+            if (cart.length === 0) {
+                cartItems.html(`
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-cart-plus fa-2x mb-2"></i>
+                        <p>No items in cart</p>
+                    </div>
+                `);
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                const cartItem = `
+                    <div class="cart-item">
+                        <div class="row align-items-center">
+                            <div class="col-5">
+                                <h6 class="mb-0">${item.name}</h6>
+                                <small class="text-muted">MK ${item.price.toFixed(2)}</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="quantity-controls">
+                                    <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                                    <input type="number" class="quantity-input" value="${item.quantity}" 
+                                           onchange="setQuantity(${index}, this.value)" min="1">
+                                    <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="col-2 text-end">
+                                <h6 class="mb-0">MK ${item.total.toFixed(2)}</h6>
+                            </div>
+                            <div class="col-1 text-end">
+                                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                cartItems.append(cartItem);
+            });
+        }
+
+        // Update item quantity
+        function updateQuantity(index, change) {
+            cart[index].quantity += change;
+            
+            if (cart[index].quantity < 1) {
+                cart[index].quantity = 1;
+            }
+            
+            cart[index].total = cart[index].quantity * cart[index].price;
+            updateCartDisplay();
+            calculateTotals();
+        }
+
+        // Set specific quantity
+        function setQuantity(index, quantity) {
+            quantity = parseInt(quantity) || 1;
+            if (quantity < 1) quantity = 1;
+            
+            cart[index].quantity = quantity;
+            cart[index].total = cart[index].quantity * cart[index].price;
+            updateCartDisplay();
+            calculateTotals();
+        }
+
+        // Remove item from cart
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+            calculateTotals();
+        }
+
+        // Clear cart
+        function clearCart() {
+            if (cart.length === 0) return;
+            
+            if (confirm('Are you sure you want to clear the cart?')) {
+                cart = [];
+                updateCartDisplay();
+                calculateTotals();
+                showAlert('Cart cleared', 'info');
+            }
+        }
+
+        // Calculate totals
+        function calculateTotals() {
+            const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+            const tax = parseFloat($('#taxInput').val()) || 0;
+            const discount = parseFloat($('#discountInput').val()) || 0;
+            const total = subtotal + tax - discount;
+
+            $('#subtotal').text(subtotal.toFixed(2));
+            $('#taxAmount').text(tax.toFixed(2));
+            $('#discountAmount').text(discount.toFixed(2));
+            $('#totalAmount').text(total.toFixed(2));
+        }
+
+        // Process sale
+        function processSale() {
+            if (cart.length === 0) {
+                showAlert('Please add items to cart before processing sale', 'warning');
+                return;
+            }
+
+            const customer = {
+                name: $('#customerName').val().trim(),
+                phone: $('#customerPhone').val().trim()
+            };
+
+            const saleData = {
+                customer: customer.name || customer.phone ? customer : undefined,
+                items: cart.map(item => ({
+                    product: item.product,
+                    quantity: item.quantity
+                })),
+                tax: parseFloat($('#taxInput').val()) || 0,
+                discount: parseFloat($('#discountInput').val()) || 0,
+                paymentMethod: $('#paymentMethod').val(),
+                notes: 'POS Sale'
+            };
+
+            $.ajax({
+                url: '/api/sales',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(saleData),
+                success: function(response) {
+                    showAlert('Sale processed successfully!', 'success');
+                    generateReceipt(response.sale);
+                    clearCart();
+                    loadTodaySales();
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error';
+                    showAlert('Error processing sale: ' + error, 'danger');
+                }
+            });
+        }
+
+        // Generate receipt
+        function generateReceipt(sale) {
+            const receiptContent = $('#receiptContent');
+            receiptContent.empty();
+
+            const receiptHtml = `
+                <div class="text-center mb-3">
+                    <h4>INVENTORY SYSTEM</h4>
+                    <p>POS Receipt</p>
+                </div>
+                
+                <div class="row mb-2">
+                    <div class="col-6">Receipt #:</div>
+                    <div class="col-6 text-end">${sale.saleNumber}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Date:</div>
+                    <div class="col-6 text-end">${new Date(sale.createdAt).toLocaleString()}</div>
+                </div>
+                
+                ${sale.customer && sale.customer.name ? `
+                <div class="row mb-2">
+                    <div class="col-6">Customer:</div>
+                    <div class="col-6 text-end">${sale.customer.name}</div>
+                </div>
+                ` : ''}
+                
+                <hr>
+                
+                <div class="mb-3">
+                    ${sale.items.map(item => `
+                        <div class="row mb-1">
+                            <div class="col-6">${item.product.name} x${item.quantity}</div>
+                            <div class="col-6 text-end">MK ${item.total.toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <hr>
+                
+                <div class="row mb-1">
+                    <div class="col-6">Subtotal:</div>
+                    <div class="col-6 text-end">MK ${sale.subtotal.toFixed(2)}</div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-6">Tax:</div>
+                    <div class="col-6 text-end">MK ${sale.tax.toFixed(2)}</div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-6">Discount:</div>
+                    <div class="col-6 text-end">MK ${sale.discount.toFixed(2)}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Total:</strong></div>
+                    <div class="col-6 text-end"><strong>MK ${sale.total.toFixed(2)}</strong></div>
+                </div>
+                
+                <hr>
+                
+                <div class="row mb-1">
+                    <div class="col-6">Payment Method:</div>
+                    <div class="col-6 text-end">${sale.paymentMethod.toUpperCase()}</div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <p>Thank you for your business!</p>
+                </div>
+            `;
+
+            receiptContent.html(receiptHtml);
+            $('#receiptModal').modal('show');
+        }
+
+        // Print receipt
+        function printReceipt() {
+            const receiptContent = document.getElementById('receiptContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Receipt</title>
+                        <style>
+                            body { font-family: 'Courier New', monospace; padding: 20px; }
+                            .text-center { text-align: center; }
+                            .text-end { text-align: right; }
+                            .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+                            hr { border: 1px dashed #000; margin: 10px 0; }
+                        </style>
+                    </head>
+                    <body>${receiptContent}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Initialize event handlers
+        function initializeEventHandlers() {
+            $('#taxInput, #discountInput').on('input', calculateTotals);
+            
+            $('#productSearch').on('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const filteredProducts = products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm)
+                );
+                populateProductsGrid(filteredProducts);
+            });
+
+            $('#categoryFilter').on('change', function() {
+                const categoryId = this.value;
+                const filteredProducts = categoryId ? 
+                    products.filter(product => product.Category && product.Category._id === categoryId) : 
+                    products;
+                populateProductsGrid(filteredProducts);
+            });
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 
+                             type === 'danger' ? 'alert-danger' :
+                             type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Remove existing alerts
+            $('.alert').remove();
+            
+            // Add new alert
+            $('.container-fluid').prepend(alertHtml);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

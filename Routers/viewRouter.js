@@ -76,6 +76,24 @@ router.get("/admin/products", authmiddleware, adminmiddleware, (req, res) => {
   });
 });
 
+
+router.get("/manager/inventory", authmiddleware, managermiddleware, (req, res) => {
+  res.render("manager/inventory", { 
+    title: "Inventory Management",
+    user: req.session.user,
+    headerIcon: 'warehouse'
+  });
+});
+
+
+router.get("/manager/pos", authmiddleware, managermiddleware, (req, res) => {
+  res.render("manager/pos", { 
+    title: "pos Management",
+    user: req.session.user,
+    headerIcon: 'warehouse'
+  });
+});
+
 // Staff Item view
 router.get("/staff/products", authmiddleware, (req, res) => {
   res.render("staff/products", { 
