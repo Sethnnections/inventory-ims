@@ -209,6 +209,22 @@
         });
 
         const data = await response.json();
+      // persist token & basic user info from response
+      if (data && data.user && data.user.token) {
+        const { token, id, name, email, role, ProfilePic } = data.user;
+
+        // store token (or use sessionStorage if you prefer it to clear on tab close)
+        localStorage.setItem('authToken', token);
+
+        // store non-sensitive user info for UI
+        localStorage.setItem('authUser', JSON.stringify({ id, name, email, role, ProfilePic }));
+
+        // optional: helper to automatically include the token in future fetch requests
+        window.authFetch = (input, init = {}) => {
+          init.headers = Object.assign({}, init.headers, { 'Authorization': 'Bearer ' + token });
+          return fetch(input, init);
+        };
+      }
 
         if (response.ok) {
           showAlert('Login successful!', 'success');

@@ -1,683 +1,786 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> - Inventory Management</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    
-    <style>
-        .card-stats .icon-shape {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .product-img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        .low-stock {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .in-stock {
-            color: #198754;
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <%- include('../partials/header') %>
+<!-- Page-specific CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<style>
+    .product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    .image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    .stock-low {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .stock-medium {
+        color: #ffc107;
+        font-weight: bold;
+    }
+    .stock-high {
+        color: #28a745;
+        font-weight: bold;
+    }
+    .action-buttons {
+        white-space: nowrap;
+    }
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+</style>
 
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <!-- Sidebar -->
-            <%- include('../partials/sidebar') %>
-            
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 class="h4 fw-bold mb-1">
-                            <i class="fas fa-boxes text-primary me-2"></i>Product Management
-                        </h2>
-                        <p class="text-muted mb-0">Manage products, inventory, and pricing</p>
-                    </div>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createProductModal">
-                        <i class="fas fa-plus me-2"></i>Add Product
-                    </button>
-                </div>
-
-                <!-- Alert Container -->
-                <div id="alertContainer"></div>
-
-                <!-- Stats Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card card-stats">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
-                                        <i class="fas fa-box"></i>
-                                    </div>
-                                    <div class="ms-3">
-                                        <p class="card-title text-sm mb-0">Total Products</p>
-                                        <h3 class="card-text fw-bold" id="totalProductsCount">0</h3>
-                                    </div>
-                                </div>
-                            </div>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-0">Manage your inventory products and stock levels</p>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-stats">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon icon-shape bg-success text-white rounded-circle shadow">
-                                        <i class="fas fa-warehouse"></i>
-                                    </div>
-                                    <div class="ms-3">
-                                        <p class="card-title text-sm mb-0">In Stock</p>
-                                        <h3 class="card-text fw-bold" id="inStockCount">0</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-stats">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                    </div>
-                                    <div class="ms-3">
-                                        <p class="card-title text-sm mb-0">Low Stock</p>
-                                        <h3 class="card-text fw-bold" id="lowStockCount">0</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-stats">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                                        <i class="fas fa-tags"></i>
-                                    </div>
-                                    <div class="ms-3">
-                                        <p class="card-title text-sm mb-0">Categories</p>
-                                        <h3 class="card-text fw-bold" id="categoriesCount">0</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Products Table -->
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-list me-2"></i>Products List
-                        </h5>
-                        <div class="d-flex gap-2">
-                            <input type="text" id="searchProducts" class="form-control form-control-sm" placeholder="Search products..." style="width: 200px;">
-                            <select id="categoryFilter" class="form-select form-select-sm" style="width: 150px;">
-                                <option value="">All Categories</option>
-                            </select>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshProducts()" title="Refresh">
-                                <i class="fas fa-sync-alt"></i>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                                <i class="fas fa-plus me-2"></i>Add New Product
                             </button>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover w-100" id="productsDataTable">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th width="5%">#</th>
-                                        <th width="10%">Image</th>
-                                        <th width="20%">Product Name</th>
-                                        <th width="15%">Category</th>
-                                        <th width="10%">Price</th>
-                                        <th width="10%">Stock</th>
-                                        <th width="20%">Description</th>
-                                        <th width="10%">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productsTableBody">
-                                    <tr>
-                                        <td colspan="8" class="text-center py-4">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">Loading products...</span>
-                                            </div>
-                                            <div class="mt-2 text-muted">Loading products...</div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0" id="searchProducts" placeholder="Search products by name or description...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="categoryFilter">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="stockFilter">
+                                <option value="">All Stock Levels</option>
+                                <option value="out">Out of Stock</option>
+                                <option value="low">Low Stock</option>
+                                <option value="medium">Medium Stock</option>
+                                <option value="high">In Stock</option>
+                            </select>
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Create Product Modal -->
-    <div class="modal fade" id="createProductModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create New Product</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="createProductForm">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="productName" class="form-label">Product Name *</label>
-                                    <input type="text" class="form-control" id="productName" name="name" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="productCategory" class="form-label">Category *</label>
-                                    <select class="form-select" id="productCategory" name="Category" required>
-                                        <option value="">Select Category</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="productPrice" class="form-label">Price ($) *</label>
-                                    <input type="number" class="form-control" id="productPrice" name="Price" step="0.01" min="0" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="productQuantity" class="form-label">Quantity *</label>
-                                    <input type="number" class="form-control" id="productQuantity" name="quantity" min="0" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="productDescription" class="form-label">Description *</label>
-                            <textarea class="form-control" id="productDescription" name="Desciption" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="productImage" class="form-label">Product Image (Optional)</label>
-                            <input type="file" class="form-control" id="productImage" name="image" accept="image/*">
-                            <div class="form-text">Upload product image (JPG, PNG, GIF)</div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="createProductBtn" onclick="createProduct()">
-                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                        Create Product
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Edit Product Modal -->
-    <div class="modal fade" id="editProductModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Product</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Products Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list text-gold me-2"></i>
+                        Products List
+                    </h5>
                 </div>
-                <div class="modal-body">
-                    <form id="editProductForm">
-                        <input type="hidden" id="editProductId" name="id">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="editProductName" class="form-label">Product Name *</label>
-                                    <input type="text" class="form-control" id="editProductName" name="name" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="editProductCategory" class="form-label">Category *</label>
-                                    <select class="form-select" id="editProductCategory" name="Category" required>
-                                        <option value="">Select Category</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="editProductPrice" class="form-label">Price ($) *</label>
-                                    <input type="number" class="form-control" id="editProductPrice" name="Price" step="0.01" min="0" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="editProductQuantity" class="form-label">Quantity *</label>
-                                    <input type="number" class="form-control" id="editProductQuantity" name="quantity" min="0" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editProductDescription" class="form-label">Description *</label>
-                            <textarea class="form-control" id="editProductDescription" name="Desciption" rows="3" required></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="updateProductBtn" onclick="updateProduct()">
-                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                        Update Product
-                    </button>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="productsTable" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Supplier</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Products will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteProductModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">Confirm Deletion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addProductForm" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <p>Are you sure you want to delete product: <strong id="deleteProductName"></strong>?</p>
-                    <p class="text-danger">This action cannot be undone and will permanently remove the product from the system.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Product Name *</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Price *</label>
+                                <input type="number" class="form-control" name="Price" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description *</label>
+                        <textarea class="form-control" name="Desciption" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Category *</label>
+                                <select class="form-select" name="Category" id="productCategory" required>
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Supplier</label>
+                                <select class="form-select" name="supplier" id="productSupplier">
+                                    <option value="">Select Supplier</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Initial Quantity</label>
+                                <input type="number" class="form-control" name="quantity" min="0" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Product Image</label>
+                                <input type="file" class="form-control" name="image" id="productImage" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Image Preview</label>
+                        <div id="imagePreview" class="border rounded p-3 text-center">
+                            <span class="text-muted">No image selected</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDeleteProduct()">
-                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                        Delete Product
-                    </button>
+                    <button type="submit" class="btn btn-primary-custom">Add Product</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-    <script>
-        // Global variables
-        let allProducts = [];
-        let allCategories = [];
-        let productToDelete = null;
-        let productsDataTable = null;
-
-        // Initialize DataTables
-        function initializeDataTable() {
-            productsDataTable = $('#productsDataTable').DataTable({
-                processing: true,
-                serverSide: false,
-                responsive: true,
-                ordering: true,
-                order: [[2, 'asc']],
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search products...",
-                    lengthMenu: "Show _MENU_ entries",
-                    info: "Showing _START_ to _END_ of _TOTAL_ products",
-                    infoEmpty: "Showing 0 to 0 of 0 products",
-                    infoFiltered: "(filtered from _MAX_ total products)",
-                    paginate: {
-                        first: "First",
-                        last: "Last",
-                        next: "Next",
-                        previous: "Previous"
-                    }
-                }
-            });
-        }
-
-        // Load all products and categories
-        async function loadProducts() {
-            try {
-                showLoadingState();
-                
-                const [productsResponse, categoriesResponse] = await Promise.all([
-                    fetch('/api/product/getproduct'),
-                    fetch('/api/category/getcategory')
-                ]);
-
-                if (!productsResponse.ok || !categoriesResponse.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-
-                const productsData = await productsResponse.json();
-                const categoriesData = await categoriesResponse.json();
-
-                allProducts = productsData.Products || [];
-                allCategories = categoriesData.categoriesWithCount || [];
-                
-                // Update stats
-                updateProductStats(allProducts);
-                
-                // Populate category dropdowns
-                populateCategoryDropdowns();
-                
-                // Populate DataTable
-                if (!productsDataTable) {
-                    initializeDataTable();
-                }
-                
-                productsDataTable.clear();
-                productsDataTable.rows.add(allProducts);
-                productsDataTable.draw();
-
-                // Setup search and filter
-                $('#searchProducts').on('keyup', function() {
-                    productsDataTable.search(this.value).draw();
-                });
-
-                $('#categoryFilter').on('change', function() {
-                    const categoryId = this.value;
-                    if (categoryId) {
-                        productsDataTable.column(3).search(categoryId).draw();
-                    } else {
-                        productsDataTable.column(3).search('').draw();
-                    }
-                });
-
-            } catch (error) {
-                console.error('Error loading products:', error);
-                showAlert('Error loading products. Please try again.', 'danger');
-                displayErrorState();
-            }
-        }
-
-        // Update product statistics
-        function updateProductStats(products) {
-            const totalProducts = products.length;
-            const inStockCount = products.filter(p => p.quantity > 10).length;
-            const lowStockCount = products.filter(p => p.quantity > 0 && p.quantity <= 10).length;
-            const categoriesCount = new Set(products.map(p => p.Category?._id)).size;
-
-            document.getElementById('totalProductsCount').textContent = totalProducts;
-            document.getElementById('inStockCount').textContent = inStockCount;
-            document.getElementById('lowStockCount').textContent = lowStockCount;
-            document.getElementById('categoriesCount').textContent = categoriesCount;
-        }
-
-        // Populate category dropdowns
-        function populateCategoryDropdowns() {
-            const createDropdown = document.getElementById('productCategory');
-            const editDropdown = document.getElementById('editProductCategory');
-            const filterDropdown = document.getElementById('categoryFilter');
-
-            const dropdowns = [createDropdown, editDropdown, filterDropdown];
-
-            dropdowns.forEach(dropdown => {
-                if (dropdown) {
-                    // Clear existing options except the first one
-                    while (dropdown.options.length > (dropdown === filterDropdown ? 0 : 1)) {
-                        dropdown.remove(1);
-                    }
-
-                    // Add categories
-                    allCategories.forEach(category => {
-                        const option = new Option(category.name, category._id);
-                        if (dropdown === filterDropdown) {
-                            dropdown.add(option);
-                        } else {
-                            dropdown.add(option);
-                        }
-                    });
-                }
-            });
-        }
-
-        // Create new product
-        async function createProduct() {
-            const form = document.getElementById('createProductForm');
-            const submitBtn = document.getElementById('createProductBtn');
-            const spinner = submitBtn.querySelector('.spinner-border');
-            
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const formData = new FormData(form);
-            const productData = {
-                name: formData.get('name'),
-                Desciption: formData.get('Desciption'),
-                Category: formData.get('Category'),
-                Price: parseFloat(formData.get('Price')),
-                quantity: parseInt(formData.get('quantity'))
-            };
-
-            try {
-                submitBtn.disabled = true;
-                spinner.classList.remove('d-none');
-
-                const response = await fetch('/api/product/addproduct', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(productData)
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('Product created successfully!', 'success');
-                    $('#createProductModal').modal('hide');
-                    form.reset();
-                    loadProducts();
-                } else {
-                    showAlert(data.message || data.error || 'Error creating product', 'danger');
-                }
-            } catch (error) {
-                console.error('Create product error:', error);
-                showAlert('Network error. Please try again.', 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.classList.add('d-none');
-            }
-        }
-
-        // Edit product
-        async function editProduct(productId) {
-            const product = allProducts.find(p => p._id === productId);
-            if (!product) return;
-
-            document.getElementById('editProductId').value = product._id;
-            document.getElementById('editProductName').value = product.name;
-            document.getElementById('editProductDescription').value = product.Desciption;
-            document.getElementById('editProductPrice').value = product.Price;
-            document.getElementById('editProductQuantity').value = product.quantity;
-            
-            // Set category
-            const categoryDropdown = document.getElementById('editProductCategory');
-            if (categoryDropdown && product.Category) {
-                categoryDropdown.value = product.Category._id || product.Category;
-            }
-
-            $('#editProductModal').modal('show');
-        }
-
-        // Update product
-        async function updateProduct() {
-            const form = document.getElementById('editProductForm');
-            const submitBtn = document.getElementById('updateProductBtn');
-            const spinner = submitBtn.querySelector('.spinner-border');
-            
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const productId = document.getElementById('editProductId').value;
-            const updateData = {
-                name: document.getElementById('editProductName').value,
-                Desciption: document.getElementById('editProductDescription').value,
-                Category: document.getElementById('editProductCategory').value,
-                Price: parseFloat(document.getElementById('editProductPrice').value),
-                quantity: parseInt(document.getElementById('editProductQuantity').value)
-            };
-
-            try {
-                submitBtn.disabled = true;
-                spinner.classList.remove('d-none');
-
-                const response = await fetch(`/api/product/editproduct/${productId}`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        updatedData: updateData
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('Product updated successfully!', 'success');
-                    $('#editProductModal').modal('hide');
-                    loadProducts();
-                } else {
-                    showAlert(data.message || 'Error updating product', 'danger');
-                }
-            } catch (error) {
-                showAlert('Network error. Please try again.', 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.classList.add('d-none');
-            }
-        }
-
-        // Show delete confirmation
-        function showDeleteConfirmation(productId, productName) {
-            productToDelete = productId;
-            document.getElementById('deleteProductName').textContent = productName;
-            $('#deleteProductModal').modal('show');
-        }
-
-        // Confirm delete
-        async function confirmDeleteProduct() {
-            if (!productToDelete) return;
-
-            const submitBtn = document.getElementById('confirmDeleteBtn');
-            const spinner = submitBtn.querySelector('.spinner-border');
-
-            try {
-                submitBtn.disabled = true;
-                spinner.classList.remove('d-none');
-
-                const response = await fetch(`/api/product/removeproduct/${productToDelete}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('Product deleted successfully!', 'success');
-                    $('#deleteProductModal').modal('hide');
-                    loadProducts();
-                } else {
-                    showAlert(data.message || 'Error deleting product', 'danger');
-                }
-            } catch (error) {
-                console.error('Delete error:', error);
-                showAlert('Network error. Please try again.', 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.classList.add('d-none');
-                productToDelete = null;
-            }
-        }
-
-        // Refresh products
-        function refreshProducts() {
-            loadProducts();
-            showAlert('Products list refreshed', 'info');
-        }
-
-        // Utility functions
-        function showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show`;
-            alert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            alertContainer.appendChild(alert);
-            setTimeout(() => alert.remove(), 5000);
-        }
-
-        function showLoadingState() {
-            const tbody = document.getElementById('productsTableBody');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading products...</span>
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editProductForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Product Name *</label>
+                                <input type="text" class="form-control" name="name" id="editProductName" required>
+                            </div>
                         </div>
-                        <div class="mt-2 text-muted">Loading products...</div>
-                    </td>
-                </tr>
-            `;
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Price *</label>
+                                <input type="number" class="form-control" name="Price" id="editProductPrice" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description *</label>
+                        <textarea class="form-control" name="Description" id="editProductDescription" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Category *</label>
+                                <select class="form-select" name="Category" id="editProductCategory" required>
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Supplier</label>
+                                <select class="form-select" name="supplier" id="editProductSupplier">
+                                    <option value="">Select Supplier</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" class="form-control" name="quantity" id="editProductQuantity" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Product Image</label>
+                                <input type="file" class="form-control" name="image" id="editProductImage" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Image Preview</label>
+                        <div id="editImagePreview" class="border rounded p-3 text-center">
+                            <span class="text-muted">No image selected</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-custom">Update Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Stock Modal -->
+<div class="modal fade" id="updateStockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="updateStockForm">
+                <input type="hidden" id="updateStockProductId" name="productId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Product</label>
+                        <p class="form-control-plaintext fw-bold" id="updateStockProductName"></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Current Quantity</label>
+                        <p class="form-control-plaintext" id="updateStockCurrentQuantity"></p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Transaction Type *</label>
+                                <select class="form-select" name="type" id="updateStockType" required>
+                                    <option value="in">Stock In</option>
+                                    <option value="out">Stock Out</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Quantity *</label>
+                                <input type="number" class="form-control" name="quantity" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="2" placeholder="Reason for stock adjustment..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-custom">Update Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- IMPORTANT: Load scripts in correct order -->
+ 
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<!-- 4. Now our custom script -->
+<script>
+    // Global variables
+    let categories = [];
+    let suppliers = [];
+    let currentEditingId = null;
+
+    // Initialize page
+    $(document).ready(function() {
+        console.log('Page ready, jQuery version:', $.fn.jquery);
+        console.log('DataTables available:', typeof $.fn.DataTable);
+        
+        loadProducts();
+        loadCategories();
+        loadSuppliers();
+        initializeEventHandlers();
+    });
+
+    // Load products data
+    function loadProducts() {
+        console.log('[loadProducts] Fetching products from /api/product/getproducts');
+
+        // If DataTable is already initialized, destroy it
+        if ($.fn.DataTable && $.fn.DataTable.isDataTable('#productsTable')) {
+            try {
+                $('#productsTable').DataTable().clear().destroy();
+            } catch (err) {
+                console.warn('[loadProducts] DataTable destroy warning:', err);
+            }
+            $('#productsTable tbody').empty();
         }
 
-        function displayErrorState() {
-            const tbody = document.getElementById('productsTableBody');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4">
-                        <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
-                        <div>Failed to load products</div>
-                        <button class="btn btn-primary mt-2" onclick="loadProducts()">
-                            <i class="fas fa-redo"></i> Try Again
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeDataTable();
-            loadProducts();
+        $.ajax({
+            url: '/api/product/getproducts',
+            type: 'GET',
+            cache: false,
+            success: function(response) {
+                const items = Array.isArray(response)
+                    ? response
+                    : ((response && (response.products || response.Products || response.data || response.items)) || []);
+                console.log('[loadProducts] Success - items count:', items.length);
+                populateProductsTable(items);
+            },
+            error: function(xhr) {
+                console.error('[loadProducts] Error loading products:', xhr);
+                showAlert('Error loading products: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'danger');
+            }
         });
-    </script>
-</body>
-</html>
+    }
+
+    // Load categories for dropdown
+    function loadCategories() {
+        $.ajax({
+            url: '/api/category/getcategory',
+            type: 'GET',
+            success: function(response) {
+                categories = response.categoriesWithCount || [];
+                populateCategoryDropdown();
+            },
+            error: function(xhr) {
+                console.error('Error loading categories:', xhr);
+            }
+        });
+    }
+
+    // Load suppliers for dropdown
+    function loadSuppliers() {
+        // Hardcoded list of 15 Malawian suppliers
+        suppliers = [
+            { _id: 'sup1', name: 'Lilongwe Agro Supplies' },
+            { _id: 'sup2', name: 'Blantyre Trading Co' },
+            { _id: 'sup3', name: 'Mzuzu Wholesale Ltd' },
+            { _id: 'sup4', name: 'Zomba Agricultural Suppliers' },
+            { _id: 'sup5', name: 'Karonga Farm Supplies' },
+            { _id: 'sup6', name: 'Salima Agro Traders' },
+            { _id: 'sup7', name: 'Mangochi Markets Ltd' },
+            { _id: 'sup8', name: 'Nsanje Supplies Co' },
+            { _id: 'sup9', name: 'Balaka Distribution Ltd' },
+            { _id: 'sup10', name: 'Chikwawa Wholesale' },
+            { _id: 'sup11', name: 'Dedza Agro Enterprises' },
+            { _id: 'sup12', name: 'Ntcheu Trading Company' },
+            { _id: 'sup13', name: 'Mwanza Farm & Feed' },
+            { _id: 'sup14', name: 'Thyolo Plantation Supplies' },
+            { _id: 'sup15', name: 'Rumphi Agro Solutions' }
+        ];
+
+        console.log('[loadSuppliers] Loaded hardcoded suppliers:', suppliers.length);
+        populateSupplierDropdown();
+    }
+
+    // Populate products table
+    function populateProductsTable(products) {
+    const tbody = $('#productsTable tbody');
+    tbody.empty();
+
+    if (products.length === 0) {
+        tbody.append('<tr><td colspan="9" class="text-center py-4">No products found</td></tr>');
+        
+        // Still initialize DataTables for empty state
+        if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#productsTable')) {
+            $('#productsTable').DataTable({
+                pageLength: 10,
+                responsive: true,
+                searching: true
+            });
+        }
+        return;
+    }
+
+    products.forEach(function(product) {
+        const qty = (product && product.quantity != null) ? product.quantity : 0;
+        const stockStatus = getStockStatus(qty);
+        const stockClass = getStockClass(qty);
+        
+        const imageHtml = product && product.image ? 
+            '<img src="' + product.image + '" alt="' + (product.name || '') + '" class="product-image">' : 
+            '<div class="product-image bg-light d-flex align-items-center justify-content-center"><i class="fas fa-box text-muted"></i></div>';
+        
+        const row = '<tr data-id="' + (product ? product._id : '') + '">' +
+            '<td>' + imageHtml + '</td>' +
+            '<td>' + (product ? (product.name || '') : '') + '</td>' +
+            '<td>' + (product ? (product.Description || 'N/A') : 'N/A') + '</td>' +
+            '<td>' + (product && product.Category ? product.Category.name : 'Uncategorized') + '</td>' +
+            '<td>' + (product && product.supplier ? product.supplier.name : 'N/A') + '</td>' +
+            '<td>$' + ((product && product.Price) ? (Number(product.Price).toFixed(2)) : '0.00') + '</td>' +
+            '<td><span class="' + stockClass + '">' + qty + '</span><small class="d-block text-muted">' + stockStatus + '</small></td>' +
+            '<td>' + (product && product.createdAt ? new Date(product.createdAt).toLocaleDateString() : '') + '</td>' +
+            '<td class="action-buttons">' +
+            '<button class="btn btn-sm btn-outline-primary me-1" onclick="editProduct(\'' + (product ? product._id : '') + '\')"><i class="fas fa-edit"></i></button>' +
+            '<button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(\'' + (product ? product._id : '') + '\', \'' + (product ? (product.name || '').replace(/'/g, "\\'") : '') + '\')"><i class="fas fa-trash"></i></button>' +
+            '<button class="btn btn-sm btn-outline-info" onclick="updateStock(\'' + (product ? product._id : '') + '\', \'' + (product ? (product.name || '').replace(/'/g, "\\'") : '') + '\', ' + qty + ')"><i class="fas fa-warehouse"></i></button>' +
+            '</td></tr>';
+        
+        tbody.append(row);
+    });
+
+    // Initialize or reinitialize DataTables
+    if ($.fn.DataTable) {
+        if ($.fn.DataTable.isDataTable('#productsTable')) {
+            $('#productsTable').DataTable().destroy();
+        }
+        
+        $('#productsTable').DataTable({
+            pageLength: 10,
+            order: [[7, 'desc']],
+            responsive: true,
+            searching: true,
+            language: {
+                emptyTable: "No products available"
+            }
+        });
+    } else {
+        console.error('DataTables not available');
+    }
+}
+// Get stock status text
+    function getStockStatus(quantity) {
+        if (quantity === 0) return 'Out of Stock';
+        if (quantity < 10) return 'Low Stock';
+        if (quantity < 50) return 'Medium Stock';
+        return 'In Stock';
+    }
+
+    // Get stock status class
+    function getStockClass(quantity) {
+        if (quantity === 0) return 'stock-low';
+        if (quantity < 10) return 'stock-low';
+        if (quantity < 50) return 'stock-medium';
+        return 'stock-high';
+    }
+
+    // Populate category dropdown
+    function populateCategoryDropdown() {
+        const select = $('#productCategory, #editProductCategory');
+        select.empty();
+        select.append('<option value="">Select Category</option>');
+        
+        categories.forEach(function(category) {
+            select.append('<option value="' + category._id + '">' + category.name + '</option>');
+        });
+    }
+
+    // Populate supplier dropdown
+    function populateSupplierDropdown() {
+        const select = $('#productSupplier, #editProductSupplier');
+        select.empty();
+        select.append('<option value="">Select Supplier</option>');
+        
+        suppliers.forEach(function(supplier) {
+            select.append('<option value="' + supplier._id + '">' + supplier.name + '</option>');
+        });
+    }
+
+    // Initialize event handlers
+    function initializeEventHandlers() {
+        // Image preview
+        $('#productImage, #editProductImage').on('change', function(e) {
+            const file = e.target.files[0];
+            const previewId = $(this).attr('id') === 'productImage' ? '#imagePreview' : '#editImagePreview';
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $(previewId).html('<img src="' + e.target.result + '" class="image-preview" alt="Preview">');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submissions
+        $('#addProductForm').on('submit', handleAddProduct);
+        $('#editProductForm').on('submit', handleEditProduct);
+        $('#updateStockForm').on('submit', handleUpdateStock);
+
+        // Search functionality
+        $('#searchProducts').on('input', function() {
+            const query = $(this).val();
+            if (query.length >= 2) {
+                searchProducts(query);
+            } else if (query.length === 0) {
+                loadProducts();
+            }
+        });
+    }
+
+    // Handle add product form submission
+    function handleAddProduct(e) {
+        e.preventDefault();
+
+        const formElement = document.getElementById('addProductForm');
+        if (!formElement) {
+            showAlert('Unable to find the add product form.', 'danger');
+            return;
+        }
+
+        // Build plain object for JSON payload
+        const payload = {};
+        const fieldNames = ['name', 'Price', 'Desciption', 'Category', 'supplier', 'quantity'];
+        fieldNames.forEach(function(name) {
+            const el = formElement.querySelector('[name="' + name + '"]');
+            payload[name] = el ? el.value : '';
+        });
+
+        const fileInput = formElement.querySelector('#productImage');
+
+        // Function that sends JSON to the server
+        function sendJson(data) {
+            console.log('Sending JSON payload:', data);
+            $.ajax({
+                url: '/api/product/createproduct',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    $('#addProductModal').modal('hide');
+                    showAlert('Product added successfully!', 'success');
+                    loadProducts();
+                    formElement.reset();
+                    $('#imagePreview').html('<span class="text-muted">No image selected</span>');
+                },
+                error: function(xhr) {
+                    console.error('Add Product Error:', xhr);
+                    showAlert('Error adding product: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'danger');
+                }
+            });
+        }
+
+        // If there's a file, convert it to a base64 data URL and include in JSON as imageData
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                // evt.target.result is a data URL (base64). Server must accept and decode it.
+                payload.imageData = evt.target.result;
+                sendJson(payload);
+            };
+            reader.onerror = function(err) {
+                console.error('FileReader error:', err);
+                showAlert('Error reading image file.', 'danger');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // No file, send JSON immediately
+            sendJson(payload);
+        }
+    }
+    
+    function handleEditProduct(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: '/api/product/updateproduct/' + currentEditingId,
+            type: 'PUT',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $('#editProductModal').modal('hide');
+                showAlert('Product updated successfully!', 'success');
+                loadProducts();
+                currentEditingId = null;
+            },
+            error: function(xhr) {
+                showAlert('Error updating product: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'danger');
+            }
+        });
+    }
+
+    // Handle update stock form submission
+    function handleUpdateStock(e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+        const productId = $('#updateStockProductId').val();
+        
+        $.ajax({
+            url: '/api/product/updatequantity/' + productId,
+            type: 'PATCH',
+            data: formData,
+            success: function(response) {
+                $('#updateStockModal').modal('hide');
+                showAlert('Stock updated successfully!', 'success');
+                loadProducts();
+            },
+            error: function(xhr) {
+                showAlert('Error updating stock: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'danger');
+            }
+        });
+    }
+
+    // Edit product
+    function editProduct(productId) {
+        $.ajax({
+            url: '/api/product/getproduct/' + productId,
+            type: 'GET',
+            success: function(product) {
+                currentEditingId = productId;
+                
+                $('#editProductName').val(product.name);
+                $('#editProductDescription').val(product.Description);
+                $('#editProductCategory').val(product.Category ? product.Category._id : '');
+                $('#editProductPrice').val(product.Price);
+                $('#editProductQuantity').val(product.quantity);
+                $('#editProductSupplier').val(product.supplier ? product.supplier._id : '');
+                
+                if (product.image) {
+                    $('#editImagePreview').html('<img src="' + product.image + '" class="image-preview" alt="Preview">');
+                } else {
+                    $('#editImagePreview').html('<span class="text-muted">No image selected</span>');
+                }
+                
+                $('#editProductModal').modal('show');
+            },
+            error: function(xhr) {
+                showAlert('Error loading product: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'danger');
+            }
+        });
+    }
+
+    // Delete product
+    function deleteProduct(productId, productName) {
+        if (confirm('Are you sure you want to delete "' + productName + '"? This action cannot be undone.')) {
+            $.ajax({
+                url: '/api/product/deleteproduct/' + productId,
+                type: 'DELETE',
+                success: function(response) {
+                    showAlert('Product deleted successfully!', 'success');
+                    loadProducts();
+                },
+                error: function(xhr) {
+                    showAlert('Error deleting product: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'danger');
+                }
+            });
+        }
+    }
+
+    // Update stock modal
+    function updateStock(productId, productName, currentQuantity) {
+        $('#updateStockProductId').val(productId);
+        $('#updateStockProductName').text(productName);
+        $('#updateStockCurrentQuantity').text(currentQuantity);
+        $('#updateStockType').val('in');
+        $('#updateStockForm')[0].reset();
+        $('#updateStockProductId').val(productId); // Reset clears this, so set it again
+        
+        $('#updateStockModal').modal('show');
+    }
+
+    // Search products
+    function searchProducts(query) {
+        $.ajax({
+            url: '/api/product/searchproducts',
+            type: 'GET',
+            data: { query: query },
+            success: function(response) {
+                const items = Array.isArray(response)
+                    ? response
+                    : (response && (response.products || response.data || response.items)) || [];
+                populateProductsTable(items);
+            },
+            error: function(xhr) {
+                showAlert('Error searching products: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'danger');
+            }
+        });
+    }
+
+    // Show alert message
+    function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertId = 'alert-' + Date.now();
+    const alertHtml = '<div id="' + alertId + '" class="alert ' + alertClass + ' alert-floating alert-dismissible fade show" role="alert">' +
+        message +
+        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+    
+    // Remove existing alerts safely
+    $('.alert-floating').each(function() {
+        try {
+            $(this).alert('close');
+        } catch (e) {
+            $(this).remove();
+        }
+    });
+    
+    $('body').append(alertHtml);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(function() {
+        const $alert = $('#' + alertId);
+        if ($alert.length) {
+            try {
+                $alert.alert('close');
+            } catch (e) {
+                $alert.remove();
+            }
+        }
+    }, 5000);
+}
+</script>

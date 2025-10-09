@@ -6,6 +6,7 @@ const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const authrouter = require('./Routers/authRouther');
 const productrouter = require('./Routers/ProductRouter');
+const ProductRouter2 = require('./Routers/productRouter2');
 const orderrouter = require('./Routers/orderRouter');
 const categoryrouter = require("./Routers/categoryRouter")
 const notificationrouter = require("./Routers/notificationRouters");
@@ -79,7 +80,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set("io", io);
 app.use(cookieParser());
 app.use('/api/auth', authrouter);
-app.use('/api/product', productrouter);
+app.use('/api/product', ProductRouter2);
 app.use('/api/order', orderrouter);
 app.use('/api/category', categoryrouter);
 app.use('/api/notification', notificationrouter);

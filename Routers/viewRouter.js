@@ -66,6 +66,7 @@ router.get("/admin/categories", authmiddleware, adminmiddleware, (req, res) => {
   });
 });
 
+
 // Product management route
 router.get("/admin/products", authmiddleware, adminmiddleware, (req, res) => {
   res.render("admin/products", { 
