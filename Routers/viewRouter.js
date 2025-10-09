@@ -67,19 +67,19 @@ router.get("/admin/categories", authmiddleware, adminmiddleware, (req, res) => {
 });
 
 
-// Product management route
+// Item management route
 router.get("/admin/products", authmiddleware, adminmiddleware, (req, res) => {
   res.render("admin/products", { 
-    title: "Product Management",
+    title: "Item Management",
     user: req.session.user,
     headerIcon: 'boxes'
   });
 });
 
-// Staff product view
+// Staff Item view
 router.get("/staff/products", authmiddleware, (req, res) => {
   res.render("staff/products", { 
-    title: "Products",
+    title: "Items",
     user: req.session.user,
     headerIcon: 'box'
   });
