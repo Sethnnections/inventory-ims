@@ -93,6 +93,11 @@ app.use("/api/stocktransaction", stocktransactionrouter);
 const viewrouter = require('./Routers/viewRouter');
 app.use('/', viewrouter);
 
+const dashboardrouter = require('./Routers/dashboardRoutes');
+
+app.use('/dashboard', dashboardrouter);
+app.use('/api/dashboard', dashboardrouter);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server Error:', err.stack);

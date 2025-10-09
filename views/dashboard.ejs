@@ -2,6 +2,17 @@
 // Set header icon for dashboard
 headerIcon = 'tachometer-alt';
 
+// Safe default values
+const safeFilters = typeof filters !== 'undefined' ? filters : { period: 'today', category: 'all' };
+const safeCategories = Array.isArray(categories) ? categories : [];
+const safeStats = typeof stats !== 'undefined' ? stats : { 
+    summary: { totalSales: 0, totalTransactions: 0, averageSale: 0, productCount: 0 },
+    charts: { salesByCategory: [], dailySales: [] },
+    inventory: [],
+    users: []
+};
+const safeRecentActivities = Array.isArray(recentActivities) ? recentActivities : [];
+
 // Alert handling
 if (typeof alertMessage !== 'undefined' && alertMessage) {
     javascript = `
@@ -27,89 +38,137 @@ if (typeof alertMessage !== 'undefined' && alertMessage) {
 }
 %>
 
+<!-- Dashboard Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form id="dashboardFilter" class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <label for="period" class="form-label">Time Period</label>
+                        <select class="form-select" id="period" name="period">
+                            <option value="today" <%= safeFilters.period === 'today' ? 'selected' : '' %>>Today</option>
+                            <option value="yesterday" <%= safeFilters.period === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
+                            <option value="week" <%= safeFilters.period === 'week' ? 'selected' : '' %>>This Week</option>
+                            <option value="month" <%= safeFilters.period === 'month' ? 'selected' : '' %>>This Month</option>
+                            <option value="year" <%= safeFilters.period === 'year' ? 'selected' : '' %>>This Year</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="all" <%= safeFilters.category === 'all' ? 'selected' : '' %>>All Categories</option>
+                            <% safeCategories.forEach(cat => { %>
+                                <option value="<%= cat._id %>" <%= safeFilters.category === cat._id.toString() ? 'selected' : '' %>>
+                                    <%= cat.name %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-filter me-1"></i>Apply Filters
+                        </button>
+                        <button type="button" id="resetFilters" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo me-1"></i>Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Message -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<% } %>
 
 <!-- Statistics Cards -->
 <div class="row">
-    <!-- Role-based dashboard cards -->
-    <% if (user.role === 'admin') { %>
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="text-primary mb-0" id="adminCount">-</h2>
-                            <p class="text-muted mb-0">Administrators</p>
-                        </div>
-                        <div class="bg-primary rounded-circle p-3">
-                            <i class="fas fa-user-shield fa-2x text-white"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <small class="text-success">
-                            <i class="fas fa-arrow-up me-1"></i>
-                            System Managers
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <% } %>
-    
-    <% if (user.role === 'admin' || user.role === 'manager') { %>
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="text-success mb-0" id="managerCount">-</h2>
-                            <p class="text-muted mb-0">Managers</p>
-                        </div>
-                        <div class="bg-success rounded-circle p-3">
-                            <i class="fas fa-user-tie fa-2x text-white"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <small class="text-success">
-                            <i class="fas fa-users me-1"></i>
-                            Team Leaders
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <% } %>
-    
+    <!-- Total Sales -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="text-info mb-0" id="staffCount">-</h2>
-                        <p class="text-muted mb-0">Staff Members</p>
+                        <h2 class="text-gold mb-0">$<span id="totalSales"><%= safeStats.summary.totalSales.toFixed(2) %></span></h2>
+                        <p class="text-muted mb-0">Total Sales</p>
                     </div>
-                    <div class="bg-info rounded-circle p-3">
-                        <i class="fas fa-users fa-2x text-white"></i>
+                    <div class="bg-gold rounded-circle p-3">
+                        <i class="fas fa-dollar-sign fa-2x text-white"></i>
                     </div>
                 </div>
                 <div class="mt-3">
                     <small class="text-success">
-                        <i class="fas fa-user-check me-1"></i>
-                        Active Team
+                        <i class="fas fa-chart-line me-1"></i>
+                        <span id="salesTrend">+12%</span> from last period
                     </small>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Total Transactions -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="text-warning mb-0" id="productCount">-</h2>
-                        <p class="text-muted mb-0">Total Products</p>
+                        <h2 class="text-dark-green mb-0" id="totalTransactions"><%= safeStats.summary.totalTransactions %></h2>
+                        <p class="text-muted mb-0">Transactions</p>
+                    </div>
+                    <div class="bg-dark-green rounded-circle p-3">
+                        <i class="fas fa-receipt fa-2x text-white"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-success">
+                        <i class="fas fa-shopping-cart me-1"></i>
+                        <span id="transactionTrend">+8%</span> growth
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Average Sale -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="text-warning mb-0">$<span id="averageSale"><%= safeStats.summary.averageSale.toFixed(2) %></span></h2>
+                        <p class="text-muted mb-0">Average Sale</p>
                     </div>
                     <div class="bg-warning rounded-circle p-3">
+                        <i class="fas fa-chart-pie fa-2x text-white"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-success">
+                        <i class="fas fa-trending-up me-1"></i>
+                        <span id="averageTrend">+5%</span> increase
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Products -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="text-info mb-0" id="productCount"><%= safeStats.summary.productCount %></h2>
+                        <p class="text-muted mb-0">Total Products</p>
+                    </div>
+                    <div class="bg-info rounded-circle p-3">
                         <i class="fas fa-box fa-2x text-white"></i>
                     </div>
                 </div>
@@ -124,52 +183,141 @@ if (typeof alertMessage !== 'undefined' && alertMessage) {
     </div>
 </div>
 
-<!-- Quick Actions -->
+<!-- Charts Section -->
 <div class="row mt-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
+    <!-- Sales by Category Chart -->
+    <div class="col-xl-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-dark">
+                    <i class="fas fa-chart-bar text-gold me-2"></i>Sales by Category
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Sales Trend -->
+    <div class="col-xl-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-dark">
+                    <i class="fas fa-chart-line text-dark-green me-2"></i>Daily Sales Trend
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="salesTrendChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Stats and Quick Actions -->
+<div class="row mt-4">
+    <!-- Inventory Status -->
+    <div class="col-xl-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-dark">
+                    <i class="fas fa-warehouse text-info me-2"></i>Inventory Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                        <span class="text-success">
+                            <i class="fas fa-circle me-2"></i>In Stock
+                        </span>
+                        <span class="badge bg-success rounded-pill" id="inStockCount">
+                            <% 
+                            const inStock = safeStats.inventory.find(item => item._id === 'in-stock');
+                            %>
+                            <%= inStock ? inStock.count : 0 %>
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                        <span class="text-warning">
+                            <i class="fas fa-circle me-2"></i>Low Stock
+                        </span>
+                        <span class="badge bg-warning rounded-pill" id="lowStockCount">
+                            <% 
+                            const lowStock = safeStats.inventory.find(item => item._id === 'low-stock');
+                            %>
+                            <%= lowStock ? lowStock.count : 0 %>
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                        <span class="text-danger">
+                            <i class="fas fa-circle me-2"></i>Out of Stock
+                        </span>
+                        <span class="badge bg-danger rounded-pill" id="outOfStockCount">
+                            <% 
+                            const outOfStock = safeStats.inventory.find(item => item._id === 'out-of-stock');
+                            %>
+                            <%= outOfStock ? outOfStock.count : 0 %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Statistics -->
+    <div class="col-xl-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-dark">
+                    <i class="fas fa-users text-primary me-2"></i>User Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <% safeStats.users.forEach(userStat => { %>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                            <span class="text-capitalize">
+                                <i class="fas fa-user me-2"></i><%= userStat._id %>s
+                            </span>
+                            <span class="badge bg-primary rounded-pill"><%= userStat.count %></span>
+                        </div>
+                    <% }); %>
+                    <% if (safeStats.users.length === 0) { %>
+                        <div class="list-group-item border-0 px-0 text-muted text-center">
+                            No user data available
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-xl-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3">
                 <h5 class="card-title mb-0 text-dark">
                     <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
                 </h5>
             </div>
             <div class="card-body">
-                <div class="row g-3">
-                    <% if (user.role === 'admin') { %>
-                        <div class="col-xl-3 col-md-6">
-                            <a href="/admin/users" class="btn btn-outline-primary w-100 h-100 py-3">
-                                <i class="fas fa-users fa-2x mb-2"></i>
-                                <div>Manage Users</div>
-                                <small class="text-muted">User administration</small>
-                            </a>
-                        </div>
-                    <% } %>
-                    
-                    <% if (user.role === 'manager' || user.role === 'admin') { %>
-                        <div class="col-xl-3 col-md-6">
-                            <a href="/manager/inventory" class="btn btn-outline-success w-100 h-100 py-3">
-                                <i class="fas fa-warehouse fa-2x mb-2"></i>
-                                <div>Manage Inventory</div>
-                                <small class="text-muted">Stock control</small>
-                            </a>
-                        </div>
-                    <% } %>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <a href="/staff/products" class="btn btn-outline-info w-100 h-100 py-3">
-                            <i class="fas fa-box fa-2x mb-2"></i>
-                            <div>View Products</div>
-                            <small class="text-muted">Browse catalog</small>
+                <div class="d-grid gap-2">
+                    <% if (user.role === 'admin' || user.role === 'manager') { %>
+                        <a href="/sales/create" class="btn btn-outline-gold btn-sm">
+                            <i class="fas fa-cash-register me-2"></i>New Sale
                         </a>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <a href="/profile" class="btn btn-outline-secondary w-100 h-100 py-3">
-                            <i class="fas fa-user fa-2x mb-2"></i>
-                            <div>My Profile</div>
-                            <small class="text-muted">Account settings</small>
+                    <% } %>
+                    <a href="/products" class="btn btn-outline-dark-green btn-sm">
+                        <i class="fas fa-box me-2"></i>View Products
+                    </a>
+                    <% if (user.role === 'admin' || user.role === 'manager') { %>
+                        <a href="/inventory" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-warehouse me-2"></i>Manage Inventory
                         </a>
-                    </div>
+                    <% } %>
+                    <a href="/profile" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-user me-2"></i>My Profile
+                    </a>
                 </div>
             </div>
         </div>
@@ -186,56 +334,238 @@ if (typeof alertMessage !== 'undefined' && alertMessage) {
                 </h5>
             </div>
             <div class="card-body">
-                <div class="text-center py-4">
-                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">Activity tracking coming soon...</p>
-                </div>
+                <% if (safeRecentActivities.length > 0) { %>
+                    <div class="list-group list-group-flush">
+                        <% safeRecentActivities.forEach(activity => { %>
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1"><%= activity.action %></h6>
+                                        <p class="mb-1 text-muted"><%= activity.description %></p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <%= new Date(activity.createdAt).toLocaleString() %>
+                                            <% if (activity.userId) { %>
+                                                • By <%= activity.userId.name %>
+                                            <% } %>
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-secondary rounded-pill text-capitalize">
+                                        <%= activity.entity %>
+                                    </span>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recent activity found</p>
+                    </div>
+                <% } %>
             </div>
         </div>
     </div>
 </div>
 
+<!-- CSS for Custom Colors -->
+<style>
+:root {
+    --dark-green: #1a472a;
+    --gold: #d4af37;
+    --light-gold: #f4e4a6;
+    --dark-gold: #b8941f;
+}
+
+.bg-dark-green { background-color: var(--dark-green) !important; }
+.text-dark-green { color: var(--dark-green) !important; }
+.bg-gold { background-color: var(--gold) !important; }
+.text-gold { color: var(--gold) !important; }
+
+.btn-outline-gold {
+    color: var(--gold);
+    border-color: var(--gold);
+}
+
+.btn-outline-gold:hover {
+    background-color: var(--gold);
+    color: white;
+    border-color: var(--gold);
+}
+
+.btn-outline-dark-green {
+    color: var(--dark-green);
+    border-color: var(--dark-green);
+}
+
+.btn-outline-dark-green:hover {
+    background-color: var(--dark-green);
+    color: white;
+    border-color: var(--dark-green);
+}
+
+.alert-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+}
+</style>
+
+<!-- JavaScript for Charts and Filters -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Load dashboard statistics
-async function loadDashboardStats() {
-    try {
-        const [staffRes, productsRes] = await Promise.all([
-            fetch('/api/auth/staffuser', { credentials: 'include' }),
-            fetch('/api/product', { credentials: 'include' })
-        ]);
-        
-        if (staffRes.ok) {
-            const staffData = await staffRes.json();
-            document.getElementById('staffCount').textContent = Array.isArray(staffData) ? staffData.length : 0;
-        }
-        
-        const userRole = '<%= user.role %>';
-        
-        if ((userRole === 'admin' || userRole === 'manager') && staffRes.ok) {
-            const managerRes = await fetch('/api/auth/manageruser', { credentials: 'include' });
-            if (managerRes.ok) {
-                const managerData = await managerRes.json();
-                document.getElementById('managerCount').textContent = Array.isArray(managerData) ? managerData.length : 0;
+// Chart colors
+const chartColors = {
+    darkGreen: '#1a472a',
+    gold: '#d4af37',
+    lightGold: '#f4e4a6',
+    darkGold: '#b8941f',
+    secondary: '#6c757d'
+};
+
+// Initialize Charts
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    setupEventListeners();
+    loadRealTimeStats();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadRealTimeStats, 30000);
+});
+
+function initializeCharts() {
+    // Sales by Category Chart (Bar Chart)
+    const categoryCtx = document.getElementById('categoryChart');
+    if (categoryCtx) {
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: <%= JSON.stringify(safeStats.charts.salesByCategory.map(item => item._id)) %>,
+                datasets: [{
+                    label: 'Sales Amount ($)',
+                    data: <%= JSON.stringify(safeStats.charts.salesByCategory.map(item => item.totalSales)) %>,
+                    backgroundColor: chartColors.darkGreen,
+                    borderColor: chartColors.gold,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `$${context.raw.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
             }
-        }
-        
-        if (userRole === 'admin') {
-            const adminRes = await fetch('/api/auth/adminuser', { credentials: 'include' });
-            if (adminRes.ok) {
-                const adminData = await adminRes.json();
-                document.getElementById('adminCount').textContent = Array.isArray(adminData) ? adminData.length : 0;
+        });
+    }
+
+    // Daily Sales Trend Chart (Line Chart)
+    const trendCtx = document.getElementById('salesTrendChart');
+    if (trendCtx) {
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: <%= JSON.stringify(safeStats.charts.dailySales.map(item => item._id)) %>,
+                datasets: [{
+                    label: 'Daily Sales ($)',
+                    data: <%= JSON.stringify(safeStats.charts.dailySales.map(item => item.totalSales)) %>,
+                    backgroundColor: chartColors.lightGold,
+                    borderColor: chartColors.gold,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `$${context.raw.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
             }
-        }
-        
-        if (productsRes.ok) {
-            const productsData = await productsRes.json();
-            document.getElementById('productCount').textContent = Array.isArray(productsData) ? productsData.length : 0;
-        }
-        
-    } catch (error) {
-        console.error('Error loading dashboard stats:', error);
+        });
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadDashboardStats);
+function setupEventListeners() {
+    // Filter form submission
+    const filterForm = document.getElementById('dashboardFilter');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const params = new URLSearchParams(formData);
+            window.location.href = `/dashboard?${params.toString()}`;
+        });
+    }
+
+    // Reset filters
+    const resetBtn = document.getElementById('resetFilters');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            window.location.href = '/dashboard';
+        });
+    }
+}
+
+async function loadRealTimeStats() {
+    try {
+        const response = await fetch('/api/dashboard/realtime', {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                // Update inventory counts
+                if (data.data.lowStockCount !== undefined) {
+                    document.getElementById('lowStockCount').textContent = data.data.lowStockCount;
+                }
+                if (data.data.outOfStockCount !== undefined) {
+                    document.getElementById('outOfStockCount').textContent = data.data.outOfStockCount;
+                }
+                if (data.data.inStockCount !== undefined) {
+                    document.getElementById('inStockCount').textContent = data.data.inStockCount;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading real-time stats:', error);
+    }
+}
 </script>

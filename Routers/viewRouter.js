@@ -25,18 +25,7 @@ router.get("/login", (req, res) => {
   });
 });
 
-// Dashboard with role-based access
-router.get("/dashboard", authmiddleware, (req, res) => {
-    const alertMessage = req.query.message;
-    const alertType = req.query.type;
-    
-    res.render("dashboard", { 
-        title: "Dashboard",
-        user: req.session.user,
-        alertMessage,
-        alertType
-    });
-});
+
 
 // Admin only routes
 router.get("/admin/users", authmiddleware, adminmiddleware, (req, res) => {
