@@ -19,33 +19,52 @@ const session = require('express-session');
 const path = require('path');
 
 require("dotenv").config();
-const PORT = process.env.PORT || 3003;
 
 const app = express();
-const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5000",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  },
-});
+// For serverless, we need to handle both HTTP and serverless environments
+let server;
+let io;
 
-app.use(cors({
-  origin: "http://localhost:5000",
+if (process.env.VERCEL) {
+  // Serverless environment
+  server = http.createServer(app);
+  io = new Server(server, {
+    cors: {
+      origin: process.env.FRONTEND_URL || "http://localhost:5000",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      credentials: true,
+    },
+  });
+} else {
+  // Local development
+  server = http.createServer(app);
+  io = new Server(server, {
+    cors: {
+      origin: "http://localhost:5000",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      credentials: true,
+    },
+  });
+}
+
+// CORS configuration
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:5000",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
-}));
+};
 
+app.use(cors(corsOptions));
+
+// View engine setup
 const expressLayouts = require('express-ejs-layouts');
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/base');
 
-// Fix static file serving
+// Static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
@@ -56,17 +75,21 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000
-  }
+  },
+  store: process.env.VERCEL ? 
+    new session.MemoryStore() : // Use MemoryStore for serverless (note: sessions won't persist between invocations)
+    undefined
 }));
 
-// Add middleware to make user data available in all views
+// Make user data available in views
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
 
+// Socket.io setup
 io.on("connection", (socket) => {
   console.log("A user connected");
 
@@ -75,10 +98,13 @@ io.on("connection", (socket) => {
   });
 });
 
+// Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.set("io", io);
 app.use(cookieParser());
+
+// API Routes
 app.use('/api/auth', authrouter);
 app.use('/api/product', ProductRouter2);
 app.use('/api/order', orderrouter);
@@ -90,11 +116,12 @@ app.use('/api/sales', salesrouter);
 app.use('/api/supplier', supplierrouter);
 app.use("/api/stocktransaction", stocktransactionrouter);
 
+// View Routes
 const viewrouter = require('./Routers/viewRouter');
 app.use('/', viewrouter);
 
+// Dashboard Routes
 const dashboardrouter = require('./Routers/dashboardRoutes');
-
 app.use('/dashboard', dashboardrouter);
 app.use('/api/dashboard', dashboardrouter);
 
@@ -129,14 +156,22 @@ app.use((req, res) => {
   });
 });
 
-server.listen(PORT, async () => {
-  try {
-    await MongoDBconfig();
-    console.log(`The server is running at port ${PORT}`);
-    console.log('connected to database successfully');
-  } catch (err) {
-    console.error("Failed to connect to MongoDB:", err);
-  }
-});
+// Serverless function handler
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  // Local development server
+  const PORT = process.env.PORT || 3003;
+  
+  server.listen(PORT, async () => {
+    try {
+      await MongoDBconfig();
+      console.log(`The server is running at port ${PORT}`);
+      console.log('connected to database successfully');
+    } catch (err) {
+      console.error("Failed to connect to MongoDB:", err);
+    }
+  });
 
-module.exports = { io, server };
+  module.exports = { io, server };
+}

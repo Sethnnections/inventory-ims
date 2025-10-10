@@ -96,7 +96,7 @@ if (typeof alertMessage !== 'undefined' && alertMessage) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="text-gold mb-0">$<span id="totalSales"><%= safeStats.summary.totalSales.toFixed(2) %></span></h2>
+                        <h2 class="text-gold mb-0">MK<span id="totalSales"><%= safeStats.summary.totalSales.toFixed(2) %></span></h2>
                         <p class="text-muted mb-0">Total Sales</p>
                     </div>
                     <div class="bg-gold rounded-circle p-3">
@@ -142,7 +142,7 @@ if (typeof alertMessage !== 'undefined' && alertMessage) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="text-warning mb-0">$<span id="averageSale"><%= safeStats.summary.averageSale.toFixed(2) %></span></h2>
+                        <h2 class="text-warning mb-0">MK<span id="averageSale"><%= safeStats.summary.averageSale.toFixed(2) %></span></h2>
                         <p class="text-muted mb-0">Average Sale</p>
                     </div>
                     <div class="bg-warning rounded-circle p-3">
@@ -444,7 +444,7 @@ function initializeCharts() {
             data: {
                 labels: <%= JSON.stringify(safeStats.charts.salesByCategory.map(item => item._id)) %>,
                 datasets: [{
-                    label: 'Sales Amount ($)',
+                    label: 'Sales Amount (MK)',
                     data: <%= JSON.stringify(safeStats.charts.salesByCategory.map(item => item.totalSales)) %>,
                     backgroundColor: chartColors.darkGreen,
                     borderColor: chartColors.gold,
@@ -460,7 +460,7 @@ function initializeCharts() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return `$${context.raw.toFixed(2)}`;
+                                return `MK${context.raw.toFixed(2)}`;
                             }
                         }
                     }
@@ -487,7 +487,7 @@ function initializeCharts() {
             data: {
                 labels: <%= JSON.stringify(safeStats.charts.dailySales.map(item => item._id)) %>,
                 datasets: [{
-                    label: 'Daily Sales ($)',
+                    label: 'Daily Sales (MK)',
                     data: <%= JSON.stringify(safeStats.charts.dailySales.map(item => item.totalSales)) %>,
                     backgroundColor: chartColors.lightGold,
                     borderColor: chartColors.gold,
@@ -502,7 +502,7 @@ function initializeCharts() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return `$${context.raw.toFixed(2)}`;
+                                return `MK${context.raw.toFixed(2)}`;
                             }
                         }
                     }
