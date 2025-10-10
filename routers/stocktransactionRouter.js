@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {createStockTransaction,getAllStockTransactions,searchStocks,getStockTransactionsByProduct,getStockTransactionsBySupplier} = require('../controller/stocktransaction');
+const {createStockTransaction,getAllStockTransactions,searchStocks,getStockTransactionsByProduct,getStockTransactionsBySupplier} = require('../controllers/stocktransaction');
 
 
 router.post('/createStockTransaction', createStockTransaction);

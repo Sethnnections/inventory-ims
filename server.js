@@ -4,17 +4,17 @@ const { Server } = require("socket.io");
 const http = require("http");
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
-const authrouter = require('./Routers/authRouther');
-const productrouter = require('./Routers/ProductRouter');
-const ProductRouter2 = require('./Routers/productRouter');
-const orderrouter = require('./Routers/orderRouter');
-const categoryrouter = require("./Routers/categoryRouter")
-const notificationrouter = require("./Routers/notificationRouters");
-const activityrouter = require("./Routers/activityRouter");
-const inventoryrouter = require('./Routers/inventoryRouter');
-const salesrouter = require('./Routers/salesRouter');
-const supplierrouter = require('./Routers/supplierrouter');
-const stocktransactionrouter = require('./Routers/stocktransactionrouter');
+const authrouter = require('./routers/authRouter');
+const productrouter = require('./routers/ProductRouter');
+const ProductRouter2 = require('./routers/ProductRouter');
+const orderrouter = require('./routers/orderRouter');
+const categoryrouter = require("./routers/categoryRouter")
+const notificationrouter = require("./routers/notificationRouters");
+const activityrouter = require("./routers/activityRouter");
+const inventoryrouter = require('./routers/inventoryRouter');
+const salesrouter = require('./routers/salesRouter');
+const supplierrouter = require('./routers/supplierrouter');
+const stocktransactionrouter = require('./routers/stocktransactionRouter');
 const session = require('express-session');
 const path = require('path');
 
@@ -117,11 +117,11 @@ app.use('/api/supplier', supplierrouter);
 app.use("/api/stocktransaction", stocktransactionrouter);
 
 // View Routes
-const viewrouter = require('./Routers/viewRouter');
+const viewrouter = require('./routers/viewRouter');
 app.use('/', viewrouter);
 
 // Dashboard Routes
-const dashboardrouter = require('./Routers/dashboardRoutes');
+const dashboardrouter = require('./routers/dashboardRoutes');
 app.use('/dashboard', dashboardrouter);
 app.use('/api/dashboard', dashboardrouter);
 
