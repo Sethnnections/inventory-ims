@@ -5,15 +5,14 @@ const http = require("http");
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const authrouter = require('./routers/authRouter');
-const productrouter = require('./routers/ProductRouter');
-const ProductRouter2 = require('./routers/ProductRouter');
+const Productrouter = require('./routers/ProductRouter');
 const orderrouter = require('./routers/orderRouter');
 const categoryrouter = require("./routers/categoryRouter")
 const notificationrouter = require("./routers/notificationRouters");
 const activityrouter = require("./routers/activityRouter");
 const inventoryrouter = require('./routers/inventoryRouter');
 const salesrouter = require('./routers/salesRouter');
-const supplierrouter = require('./routers/supplierrouter');
+const supplierrouter = require('./routers/supplierRouter');
 const stocktransactionrouter = require('./routers/stocktransactionRouter');
 const session = require('express-session');
 const path = require('path');
@@ -106,7 +105,7 @@ app.use(cookieParser());
 
 // API Routes
 app.use('/api/auth', authrouter);
-app.use('/api/product', ProductRouter2);
+app.use('/api/product', Productrouter);
 app.use('/api/order', orderrouter);
 app.use('/api/category', categoryrouter);
 app.use('/api/notification', notificationrouter);
