@@ -1,4 +1,4 @@
-const Sale = require('../models/salesModel');
+const Sale = require('../models/SalesModel');
 const Product = require('../models/Productmodel');
 const Inventory = require('../models/Inventorymodel');
 const logActivity = require('../libs/logger');

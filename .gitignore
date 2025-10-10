@@ -40,3 +40,4 @@ pids
 coverage/
 .env
 
+.vercel

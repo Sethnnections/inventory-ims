@@ -1,7 +1,7 @@
 const Product = require('../models/Productmodel');
-const Sale = require('../models/salesModel');
+const Sale = require('../models/SalesModel');
 const User = require('../models/Usermodel');
-const Category=require('../models/ Categorymodel');
+const Category=require('../models/Categorymodel');
 const Inventory = require('../models/Inventorymodel');
 const ActivityLog = require('../models/ActivityLogmodel');
 
