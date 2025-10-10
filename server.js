@@ -14,6 +14,7 @@ const inventoryrouter = require('./routers/inventoryRouter');
 const salesrouter = require('./routers/salesRouter');
 const supplierrouter = require('./routers/supplierRouter');
 const stocktransactionrouter = require('./routers/stocktransactionRouter');
+const sessionStore = require('./libs/sessionStore');
 const session = require('express-session');
 const path = require('path');
 
@@ -40,7 +41,7 @@ if (process.env.VERCEL) {
   server = http.createServer(app);
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5000",
+      origin: [process.env.FRONTEND_URL || "http://localhost:5000", "https://ims-navy.vercel.app"],
       methods: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,
     },
@@ -49,10 +50,17 @@ if (process.env.VERCEL) {
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:5000",
+  origin: [process.env.FRONTEND_URL || "http://localhost:5000", "https://ims-navy.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 };
+
+
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
 
 app.use(cors(corsOptions));
 
@@ -63,23 +71,29 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/base');
 
-// Static files
+// Static files - ensure these directories exist
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 
-// Session middleware
+// Add favicon route
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
+
+// Session middleware with MongoStore
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
+  store: sessionStore,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000
-  },
-  store: process.env.VERCEL ? 
-    new session.MemoryStore() : // Use MemoryStore for serverless (note: sessions won't persist between invocations)
-    undefined
+    maxAge: 24 * 60 * 60 * 1000,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  }
 }));
 
 // Make user data available in views
@@ -88,15 +102,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Socket.io setup
-io.on("connection", (socket) => {
-  console.log("A user connected");
-
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
-  });
+// Database connection middleware
+app.use(async (req, res, next) => {
+  try {
+    await MongoDBconfig();
+    next();
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    next(error);
+  }
 });
-
 // Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -174,3 +189,23 @@ if (process.env.VERCEL) {
 
   module.exports = { io, server };
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
